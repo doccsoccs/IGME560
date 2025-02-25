@@ -1,5 +1,7 @@
 extends Node2D
 
+@onready var grid = $"../IsometricGrid"
+
 var player_units: Array[Sprite2D]
 var enemy_units: Array[Sprite2D]
 

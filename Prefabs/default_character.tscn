@@ -1,10 +1,50 @@
-[gd_scene load_steps=11 format=3 uid="uid://beifeixysoyl6"]
+[gd_scene load_steps=12 format=3 uid="uid://beifeixysoyl6"]
 
 [ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_xnvij"]
 [ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_vccjh"]
 [ext_resource type="Texture2D" uid="uid://chtice56oc5ck" path="res://Sprites/Characters/clockwing_walk.png" id="3_xa0mg"]
 [ext_resource type="Texture2D" uid="uid://de7wauh0j6pb2" path="res://Sprites/Characters/clockwing_walk_faceback.png" id="4_2l1w2"]
 [ext_resource type="Texture2D" uid="uid://bpx2qbsdr6itn" path="res://Sprites/enter_key.png" id="5_ce74v"]
+[ext_resource type="PackedScene" uid="uid://ckstdvx1288y8" path="res://Prefabs/Unit Ghosts/default_character_ghost.tscn" id="6_fnvkf"]
+
+[sub_resource type="Animation" id="Animation_6y2sy"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("1_xnvij")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:hframes")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [12]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
 
 [sub_resource type="Animation" id="Animation_2hflg"]
 resource_name = "idle"
@@ -45,45 +85,6 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-}
-
-[sub_resource type="Animation" id="Animation_6y2sy"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:texture")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("1_xnvij")]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:hframes")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [12]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath(".:frame")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
 }
 
 [sub_resource type="Animation" id="Animation_8ljtx"]
@@ -175,6 +176,8 @@ _data = {
 }
 
 [node name="DefaultCharacter" type="Sprite2D"]
+z_index = 3
+y_sort_enabled = true
 texture = ExtResource("1_xnvij")
 offset = Vector2(0, -12)
 hframes = 12
@@ -189,3 +192,6 @@ libraries = {
 visible = false
 position = Vector2(0, -32)
 texture = ExtResource("5_ce74v")
+
+[node name="MovementGhost" parent="." instance=ExtResource("6_fnvkf")]
+visible = false

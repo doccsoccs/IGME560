@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://ctyihjdd4iuu3"]
+[gd_scene load_steps=13 format=3 uid="uid://ctyihjdd4iuu3"]
 
 [ext_resource type="Texture2D" uid="uid://dc7gefyu2x8nh" path="res://Sprites/Tilesets/iso_tileset.png" id="1_21esg"]
 [ext_resource type="Texture2D" uid="uid://ce2wqjw16ejbo" path="res://Sprites/Sheets/move_highlight.png" id="2_7sgtj"]
 [ext_resource type="Texture2D" uid="uid://cn54pvar1kkqx" path="res://Sprites/Sheets/attack_highlight.png" id="3_egc54"]
 [ext_resource type="Texture2D" uid="uid://bt5xsbl6hkgqy" path="res://Sprites/Sheets/selector.png" id="4_fmean"]
 [ext_resource type="Script" path="res://Scripts/grid_controller.gd" id="5_3bk1s"]
+[ext_resource type="PackedScene" uid="uid://co8t5ij1u2bol" path="res://Prefabs/tile_node.tscn" id="6_6g48s"]
 [ext_resource type="AudioStream" uid="uid://dijrx140en55i" path="res://SFX/move_selector.mp3" id="6_vsag8"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jyl1f"]
@@ -108,7 +109,9 @@ layer_6/y_sort_origin = 3
 layer_6/z_index = 6
 layer_6/tile_data = PackedInt32Array()
 script = ExtResource("5_3bk1s")
+TILE_NODE = ExtResource("6_6g48s")
 
 [node name="MoveSelectorSFX" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("6_vsag8")
+volume_db = -3.0
 bus = &"SFX"

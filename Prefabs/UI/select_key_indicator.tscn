@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://cm28u8g72cdbd"]
+
+[ext_resource type="Texture2D" uid="uid://cc561ed1qts27" path="res://Sprites/Sheets/z_key.png" id="1_w8nwo"]
+[ext_resource type="Script" path="res://Scripts/select_key_indicator.gd" id="2_feh1n"]
+
+[node name="SelectKeyIndicator" type="Sprite2D"]
+position = Vector2(0, -32)
+texture = ExtResource("1_w8nwo")
+hframes = 2
+script = ExtResource("2_feh1n")

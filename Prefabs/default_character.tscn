@@ -1,11 +1,12 @@
-[gd_scene load_steps=12 format=3 uid="uid://beifeixysoyl6"]
+[gd_scene load_steps=13 format=3 uid="uid://beifeixysoyl6"]
 
 [ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_xnvij"]
 [ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_vccjh"]
 [ext_resource type="Texture2D" uid="uid://chtice56oc5ck" path="res://Sprites/Characters/clockwing_walk.png" id="3_xa0mg"]
 [ext_resource type="Texture2D" uid="uid://de7wauh0j6pb2" path="res://Sprites/Characters/clockwing_walk_faceback.png" id="4_2l1w2"]
-[ext_resource type="Texture2D" uid="uid://bpx2qbsdr6itn" path="res://Sprites/enter_key.png" id="5_ce74v"]
+[ext_resource type="PackedScene" uid="uid://cm28u8g72cdbd" path="res://Prefabs/UI/select_key_indicator.tscn" id="5_b1ky1"]
 [ext_resource type="PackedScene" uid="uid://ckstdvx1288y8" path="res://Prefabs/Unit Ghosts/default_character_ghost.tscn" id="6_fnvkf"]
+[ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="7_x680m"]
 
 [sub_resource type="Animation" id="Animation_6y2sy"]
 length = 0.001
@@ -188,10 +189,12 @@ libraries = {
 "": SubResource("AnimationLibrary_tulgk")
 }
 
-[node name="EnterSymbol" type="Sprite2D" parent="."]
+[node name="SelectKeyIndicator" parent="." instance=ExtResource("5_b1ky1")]
 visible = false
-position = Vector2(0, -32)
-texture = ExtResource("5_ce74v")
 
 [node name="MovementGhost" parent="." instance=ExtResource("6_fnvkf")]
 visible = false
+
+[node name="SelectSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_x680m")
+volume_db = 1.0

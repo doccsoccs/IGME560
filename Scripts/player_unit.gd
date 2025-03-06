@@ -27,7 +27,11 @@ enum anim_state{
 var current_tile: Vector2i
 
 #region MOVEMENT
-const move_speed: float = 100
+const move_speed: float = 55
+var direction: Vector2
+var velocity: Vector2
+const min_dist_detection: float = 2
+
 var moving: bool = false
 var move_target: Vector2i
 var move_path: Array[Vector2i]
@@ -49,16 +53,26 @@ func _ready():
 	update_animations(initial_anim)
 	current_game_state = initial_game_state
 	await get_tree().create_timer(0.1).timeout
-	current_tile = manager.grid.local_to_map(global_position)
+	current_tile = loc_to_map(global_position)
 
 func _process(delta):
 	# Moves the unit if movement has been initialized
 	# only move if the size of the path given is positive and non-zero
-	if moving and move_path.size() > 0:
-		pass
+	if move_path.size() > 1:
+		# Move unit towards the next tile in the path
+		direction = (Vector2)(map_to_loc(move_path[1]) - map_to_loc(move_path[0])).normalized()
+		velocity = direction * move_speed * delta
+		position += velocity
+		
+		# Make sure unit locks onto each tile in path
+		if position.distance_to(map_to_loc(move_path[1])) < min_dist_detection:
+			position = map_to_loc(move_path[1])
+			move_path.pop_front()
 
+# Moves a ghost of a player character unit
+# Typically along with the cursor
 func ghost_move_tile(new_tile: Vector2i):
-	position = manager.grid.map_to_local(manager.grid.new_tile)
+	position = map_to_loc(manager.grid.new_tile)
 	current_tile = new_tile
 
 # Sets the unit's game state
@@ -73,12 +87,14 @@ func set_game_state(new_state: game_state):
 		game_state.hovering:
 			init_hovering()
 			return
-		# Z/ENTER was pressed while the selector was hovering
+		# Select input was made while the selector was hovering
 		# Allows for game actions to be taken with the unit
 		game_state.selected:
 			init_selected()
 			return
-		
+		# Select input was made after selecting the unit
+		game_state.moving:
+			return
 		# Default case
 		_:
 			return
@@ -110,9 +126,16 @@ func init_selected():
 
 # Z/ENTER was pressed while the unit was selected
 func init_moving(path: Array[Vector2i]):
-	moving = true
+	current_game_state = game_state.moving
 	move_path = path
 
 # Ends any state based functionality relavent to game_state enum
 func cancel():
 	select_key.visible = false
+
+# Shortcut for map -> local conversion
+func map_to_loc(tile: Vector2i) -> Vector2:
+	return manager.grid.map_to_local(tile)
+# Shortcut for local -> map conversion
+func loc_to_map(pos: Vector2) -> Vector2i:
+	return manager.grid.local_to_map(pos)

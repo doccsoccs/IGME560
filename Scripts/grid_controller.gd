@@ -32,6 +32,12 @@ enum layers{
 	selector = 6
 }
 
+enum control_mode{
+	free,
+	moving_unit
+}
+var current_ctrl_mode: control_mode
+
 # Sound Effects
 @onready var move_selector_sfx = $MoveSelectorSFX
 
@@ -40,6 +46,7 @@ var unit_manager
 
 # Onload
 func _ready():
+	# Initializes Selector
 	set_cell(layers.selector, init_selector_pos, selector_source, selector_atlus_pos)
 	current_selector_pos = init_selector_pos
 	
@@ -54,6 +61,9 @@ func _ready():
 	coordinate_map = get_used_cells(layers.level0)
 	# Initialize tilemap nodes for pathfinding
 	init_coord_map()
+	
+	# Initialize Input Mode
+	current_ctrl_mode = control_mode.free
 
 # Input Events
 func _input(event):
@@ -62,12 +72,7 @@ func _input(event):
 		select_unit(hovered_unit)
 	# MOVE SELECTED UNIT
 	elif event.is_action_pressed("Select") and selected_unit != null:
-		selected_unit.init_moving( \
-			get_path_dijkstra( \
-				get_tilenode_from_coord_map(current_selector_pos), \
-				get_tilenode_from_coord_map(selected_unit.current_tile) \
-			) \
-		)
+		move_unit()
 	
 	# SELECTOR MOVEMENT INPUTS
 	if event.is_action_pressed("Up"):
@@ -137,6 +142,17 @@ func project_movement(speed: int, origin: Vector2i):
 		height += 1
 		width -= 1
 
+# Calls unit telling it to begin moving using A* algorithm
+# Sets selected unit to null
+func move_unit():
+	selected_unit.init_moving( \
+		get_path_astar( \
+				get_tilenode_from_coord_map(selected_unit.current_tile), \
+				get_tilenode_from_coord_map(current_selector_pos) \
+			) \
+		)
+	selected_unit = null
+
 # Draws a highlighted movement tile at a given tile
 func draw_move_highlight(tile: Vector2i):
 	set_cell(layers.h_level0, tile, movement_source, movement_atlus_pos)
@@ -153,22 +169,94 @@ func init_coord_map():
 
 # Returns a path a unit can follow to move from one location to another
 # PARAMS: Goal/target tile & current unit's tile
-func get_path_dijkstra(target_tile: TileNode, start_tile: TileNode) -> Array[Vector2i]:
+func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 	# CASE: Move target is the same as current position
-	if target_tile == start_tile:
+	if start == goal:
 		var empty: Array[Vector2i]
 		return empty
 	
 	# Initialize the record for the start node
-	var start_record: NodeRecord
-	start_record.node = target_tile
+	var start_record: NodeRecord = NodeRecord.new()
+	start_record.node = start
 	start_record.connection = null
 	start_record.cost_so_far = 0.0
+	start_record.estimated_total_cost = Heuristic.cross_product(start, start, goal)
 	
 	# Initialize the open / closed lists
+	var open: Array[NodeRecord]
+	open.push_back(start_record)
+	var closed: Array[NodeRecord]
 	
+	# Variables
+	var current: NodeRecord = NodeRecord.new()
+	var end_node_record: NodeRecord = NodeRecord.new()
+	var end_node_heuristic: float
+	
+	# Iterate through processing each node
+	while open.size() > 0:
+		# Find the smallest element in the open list.
+		# Use estimated total cost
+		current = NodeRecord.get_smallest(open)
+		
+		# If the goal is found, then terminate
+		if current.node == goal:
+			break
+		
+		# Otherwise get outgoing connections
+		var connections: Array[TileNode] = \
+			[current.node.tile_left, current.node.tile_right, \
+			current.node.tile_up, current.node.tile_down]
+		# Remove null elements
+		connections.filter(func(connection): return connection != null)
+		
+		# Loop through each connection
+		for connection in connections:
+			var end_node: TileNode = connection
+			var end_node_cost: float = current.cost_so_far + 1
+			
+			if NodeRecord.contains_node(end_node, closed):
+				end_node_record = NodeRecord.get_record_from_list(end_node, closed)
+				if end_node_record.cost_so_far <= end_node_cost:
+					continue
+				closed.erase(end_node_record)
+				end_node_heuristic = \
+					end_node_record.estimated_total_cost - end_node_record.cost_so_far
+			
+			elif NodeRecord.contains_node(end_node, open):
+				end_node_record = NodeRecord.get_record_from_list(end_node, open)
+				if end_node_record.cost_so_far <= end_node_cost:
+					continue
+				end_node_heuristic = \
+					end_node_record.estimated_total_cost - end_node_record.cost_so_far
+			
+			else:
+				end_node_record = NodeRecord.new()
+				end_node_record.node = end_node
+				end_node_heuristic = Heuristic.cross_product(start, end_node, goal)
+			
+			end_node_record.cost_so_far = end_node_cost
+			end_node_record.connection = current
+			end_node_heuristic = end_node_cost + end_node_heuristic
+			
+			if !NodeRecord.contains_node(end_node, open):
+				open.push_back(end_node_record)
+			
+			open.erase(current)
+			closed.push_back(current)
+	# ----------------------------------------------------------------------------------------
 	
 	var path: Array[Vector2i]
+	# Construct path for return
+	if current.node != goal:
+		print("Search Failed")
+	
+	else:
+		while current.node != start:
+			path.push_back(current.node.tile_pos)
+			current = current.connection
+	
+	path.reverse()
+	path.push_front(start.tile_pos)
 	return path
 
 # Attempts to return a TileNode based on tile position information

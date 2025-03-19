@@ -14,11 +14,13 @@ enum game_state{
 	hovering,
 	selected,
 	moving,
+	select_action,
 	expended
 }
 
 enum anim_state{
 	idle,
+	idle_fb,
 	walk,
 	walk_fb
 }
@@ -44,6 +46,7 @@ const initial_anim: anim_state = anim_state.idle
 @onready var anim_player = $AnimationPlayer
 @onready var select_key = $SelectKeyIndicator
 @onready var move_ghost = $MovementGhost
+@onready var action_buttons = $ActionButtons
 @onready var manager = $".."
 
 ## SFX
@@ -68,6 +71,21 @@ func _process(delta):
 		if position.distance_to(map_to_loc(move_path[1])) < min_dist_detection:
 			position = map_to_loc(move_path[1])
 			move_path.pop_front()
+			if move_path.size() > 1:
+				set_move_animation(move_path[1])
+			else:
+				if direction.y > 0:
+					update_animations(anim_state.idle)
+				else:
+					update_animations(anim_state.idle_fb)
+				if direction.x > 0:
+					flip_h = true
+				else:
+					flip_h = false
+		
+		# Prepare to select an action after completing movement
+		if move_path.size() == 0:
+			set_game_state(game_state.select_action)
 
 # Moves a ghost of a player character unit
 # Typically along with the cursor
@@ -95,6 +113,11 @@ func set_game_state(new_state: game_state):
 		# Select input was made after selecting the unit
 		game_state.moving:
 			return
+		# Movement has completed and the unit is awaiting either an input decision or for AI
+		# to determine what action to take
+		game_state.select_action:
+			init_action_selection()
+			return
 		# Default case
 		_:
 			return
@@ -104,6 +127,9 @@ func update_animations(anim: anim_state):
 	match anim:
 		anim_state.idle:
 			anim_player.play("idle")
+			return
+		anim_state.idle_fb:
+			anim_player.play("idle_fb")
 			return
 		anim_state.walk:
 			anim_player.play("walk")
@@ -128,10 +154,31 @@ func init_selected():
 func init_moving(path: Array[Vector2i]):
 	current_game_state = game_state.moving
 	move_path = path
+	set_move_animation(move_path[1])
+
+# Initializes post-movement action selection for player
+func init_action_selection():
+	action_buttons.init()
 
 # Ends any state based functionality relavent to game_state enum
 func cancel():
 	select_key.visible = false
+
+# Changes animations based on unit movement
+func set_move_animation(target_pos: Vector2i):
+	var dir: Vector2 = (map_to_loc(target_pos) - position).normalized()
+	if dir.x < 0 and dir.y < 0: # LEFT
+		update_animations(anim_state.walk_fb)
+		flip_h = false
+	if dir.x < 0 and dir.y > 0: # DOWN
+		update_animations(anim_state.walk)
+		flip_h = false
+	if dir.x > 0 and dir.y > 0: # RIGHT
+		update_animations(anim_state.walk)
+		flip_h = true
+	if dir.x > 0 and dir.y < 0:
+		update_animations(anim_state.walk_fb)
+		flip_h = true
 
 # Shortcut for map -> local conversion
 func map_to_loc(tile: Vector2i) -> Vector2:

@@ -73,6 +73,7 @@ func _input(event):
 	# MOVE SELECTED UNIT
 	elif event.is_action_pressed("Select") and selected_unit != null:
 		move_unit()
+		hide_highlighted_tiles()
 	
 	# SELECTOR MOVEMENT INPUTS
 	if event.is_action_pressed("Up"):
@@ -142,6 +143,12 @@ func project_movement(speed: int, origin: Vector2i):
 		height += 1
 		width -= 1
 
+# Erases all highlighted movement cells
+# but does NOT clear the highlighted tiles array
+func hide_highlighted_tiles():
+	for tile in highlighted_tiles:
+		erase_cell(layers.h_level0, Vector2i(tile.x, tile.y))
+
 # Calls unit telling it to begin moving using A* algorithm
 # Sets selected unit to null
 func move_unit():
@@ -151,12 +158,14 @@ func move_unit():
 				get_tilenode_from_coord_map(current_selector_pos) \
 			) \
 		)
+	selected_unit.move_ghost.visible = false
 	selected_unit = null
 
 # Draws a highlighted movement tile at a given tile
 func draw_move_highlight(tile: Vector2i):
-	set_cell(layers.h_level0, tile, movement_source, movement_atlus_pos)
-	highlighted_tiles.push_back(tile)
+	if coordinate_map.has(tile):
+		set_cell(layers.h_level0, tile, movement_source, movement_atlus_pos)
+		highlighted_tiles.push_back(tile)
 
 # Creates a series of nodes that help perform pathfinding algorithms
 func init_coord_map():
@@ -167,12 +176,20 @@ func init_coord_map():
 	for n in coord_map_nodes.size():
 		coord_map_nodes[n].init_tile(n, coordinate_map[n])
 
+# Removes null elements from array
+func clean_array(dirty_array: Array[TileNode]) -> Array[TileNode]:
+	var cleaned_array: Array[TileNode] = []
+	for item in dirty_array:
+		if item != null:
+			cleaned_array.push_back(item)
+	return cleaned_array
+
 # Returns a path a unit can follow to move from one location to another
 # PARAMS: Goal/target tile & current unit's tile
 func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 	# CASE: Move target is the same as current position
 	if start == goal:
-		var empty: Array[Vector2i]
+		var empty: Array[Vector2i] = []
 		return empty
 	
 	# Initialize the record for the start node
@@ -183,9 +200,9 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 	start_record.estimated_total_cost = Heuristic.cross_product(start, start, goal)
 	
 	# Initialize the open / closed lists
-	var open: Array[NodeRecord]
+	var open: Array[NodeRecord] = []
 	open.push_back(start_record)
-	var closed: Array[NodeRecord]
+	var closed: Array[NodeRecord] = []
 	
 	# Variables
 	var current: NodeRecord = NodeRecord.new()
@@ -207,7 +224,7 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 			[current.node.tile_left, current.node.tile_right, \
 			current.node.tile_up, current.node.tile_down]
 		# Remove null elements
-		connections.filter(func(connection): return connection != null)
+		connections = clean_array(connections)
 		
 		# Loop through each connection
 		for connection in connections:
@@ -241,11 +258,11 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 			if !NodeRecord.contains_node(end_node, open):
 				open.push_back(end_node_record)
 			
-			open.erase(current)
-			closed.push_back(current)
+		open.erase(current)
+		closed.push_back(current)
 	# ----------------------------------------------------------------------------------------
 	
-	var path: Array[Vector2i]
+	var path: Array[Vector2i] = []
 	# Construct path for return
 	if current.node != goal:
 		print("Search Failed")

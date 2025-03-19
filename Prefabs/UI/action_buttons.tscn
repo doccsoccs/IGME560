@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://vofy6gq6oex7"]
+
+[ext_resource type="Script" path="res://Scripts/action_buttons.gd" id="1_5tjnd"]
+[ext_resource type="Texture2D" uid="uid://cut6lvk33blkk" path="res://Sprites/Sheets/action_buttons.png" id="1_oss42"]
+[ext_resource type="AudioStream" uid="uid://dijrx140en55i" path="res://SFX/move_selector.mp3" id="3_7dnln"]
+[ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="4_vuw5i"]
+
+[node name="ActionButtons" type="Sprite2D"]
+script = ExtResource("1_5tjnd")
+
+[node name="FightButton" type="Sprite2D" parent="."]
+texture = ExtResource("1_oss42")
+hframes = 6
+
+[node name="WaitButton" type="Sprite2D" parent="."]
+position = Vector2(0, 13)
+texture = ExtResource("1_oss42")
+hframes = 6
+frame = 3
+
+[node name="ToggleButtonSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_7dnln")
+volume_db = -8.0
+pitch_scale = 2.0
+
+[node name="SelectButtonSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_vuw5i")
+pitch_scale = 3.0

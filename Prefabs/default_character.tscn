@@ -1,12 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://beifeixysoyl6"]
+[gd_scene load_steps=16 format=3 uid="uid://beifeixysoyl6"]
 
 [ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_xnvij"]
 [ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_vccjh"]
 [ext_resource type="Texture2D" uid="uid://chtice56oc5ck" path="res://Sprites/Characters/clockwing_walk.png" id="3_xa0mg"]
 [ext_resource type="Texture2D" uid="uid://de7wauh0j6pb2" path="res://Sprites/Characters/clockwing_walk_faceback.png" id="4_2l1w2"]
 [ext_resource type="PackedScene" uid="uid://cm28u8g72cdbd" path="res://Prefabs/UI/select_key_indicator.tscn" id="5_b1ky1"]
+[ext_resource type="Texture2D" uid="uid://xdp6dhkybrou" path="res://Sprites/Characters/clockwing_idle_faceback.png" id="5_okv2c"]
 [ext_resource type="PackedScene" uid="uid://ckstdvx1288y8" path="res://Prefabs/Unit Ghosts/default_character_ghost.tscn" id="6_fnvkf"]
 [ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="7_x680m"]
+[ext_resource type="PackedScene" uid="uid://vofy6gq6oex7" path="res://Prefabs/UI/action_buttons.tscn" id="8_fr38c"]
 
 [sub_resource type="Animation" id="Animation_6y2sy"]
 length = 0.001
@@ -168,10 +170,52 @@ tracks/2/keys = {
 "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 }
 
+[sub_resource type="Animation" id="Animation_02kul"]
+resource_name = "idle_fb"
+length = 1.2
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("5_okv2c")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:hframes")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [12]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_tulgk"]
 _data = {
 "RESET": SubResource("Animation_6y2sy"),
 "idle": SubResource("Animation_2hflg"),
+"idle_fb": SubResource("Animation_02kul"),
 "walk": SubResource("Animation_8ljtx"),
 "walk_faceback": SubResource("Animation_l0of1")
 }
@@ -194,6 +238,10 @@ visible = false
 
 [node name="MovementGhost" parent="." instance=ExtResource("6_fnvkf")]
 visible = false
+
+[node name="ActionButtons" parent="." instance=ExtResource("8_fr38c")]
+visible = false
+position = Vector2(26, -23)
 
 [node name="SelectSFX" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("7_x680m")

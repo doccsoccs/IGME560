@@ -1,0 +1,4 @@
+All patterns are drawn facing DOWN
+c = center; the unit's position
+x = damaged square
+o = empty space

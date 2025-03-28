@@ -29,19 +29,27 @@ func _process(_delta):
 		if Input.is_action_just_pressed("Down") or Input.is_action_just_pressed("Up"):
 			toggle_button_sfx.play()
 			if active_button == fight_button:
+				active_button.frame = button_frame.fight_normal
 				active_button = wait_button
 				active_button.frame = button_frame.wait_hover
 			elif active_button == wait_button:
+				active_button.frame = button_frame.wait_normal
 				active_button = fight_button
 				active_button.frame = button_frame.fight_hover
 		
 		# Select the hovered button
 		if Input.is_action_just_pressed("Select"):
 			select_button_sfx.play()
-			if active_button == fight_button:
+			
+			if active_button == fight_button: # FIGHT
 				active_button.frame = button_frame.fight_pressed
-			elif active_button == wait_button:
+				owner.attack()
+			
+			elif active_button == wait_button: # WAIT
 				active_button.frame = button_frame.wait_pressed
+				owner.end_turn()
+			
+			set_invisible_after_time(0.35)
 		elif Input.is_action_just_released("Select"):
 			await get_tree().create_timer(0.25).timeout
 			if active_button == fight_button:
@@ -49,11 +57,11 @@ func _process(_delta):
 			elif active_button == wait_button:
 				active_button.frame = button_frame.wait_normal
 
-func set_invisible_after_time(time: float = 0.25):
+func set_invisible_after_time(time: float = 0.15):
+	active = false
 	await get_tree().create_timer(time).timeout
 	visible = false
-	active = false
 
-func init():
+func init_action_buttons():
 	active = true
 	visible = true

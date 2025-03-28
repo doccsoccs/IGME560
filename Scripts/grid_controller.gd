@@ -10,6 +10,8 @@ var current_selector_pos: Vector2i
 #region HIGHLIGHT TILE VARIABLES
 const movement_atlus_pos: Vector2i = Vector2i(0,0)
 const movement_source: int = 1
+const attack_atlus_pos: Vector2i = Vector2i(0,0)
+const attack_source: int = 2
 #endregionT
 
 # Map Data
@@ -20,7 +22,8 @@ var coord_map_nodes: Array[TileNode]
 # Temp Data
 var hovered_unit: PlayerUnit = null
 var selected_unit: PlayerUnit = null
-var highlighted_tiles: Array[Vector2i]
+var active_move_tiles: Array[Vector2i]
+var active_attack_tiles: Array[Vector2i]
 
 enum layers{
 	level0 = 0,
@@ -34,7 +37,9 @@ enum layers{
 
 enum control_mode{
 	free,
-	moving_unit
+	moving_unit,
+	selecting_action,
+	attacking
 }
 var current_ctrl_mode: control_mode
 
@@ -68,36 +73,69 @@ func _ready():
 # Input Events
 func _input(event):
 	# SELECT UNIT
-	if event.is_action_pressed("Select") and hovered_unit != null and selected_unit == null:
+	if event.is_action_pressed("Select") and hovered_unit != null and selected_unit == null \
+	and current_ctrl_mode == control_mode.free:
+		
 		select_unit(hovered_unit)
+	
 	# MOVE SELECTED UNIT
-	elif event.is_action_pressed("Select") and selected_unit != null:
+	elif event.is_action_pressed("Select") and selected_unit != null \
+	and current_ctrl_mode == control_mode.free:
+		
+		current_ctrl_mode = control_mode.moving_unit
 		move_unit()
-		hide_highlighted_tiles()
+		hide_selector()
+	
+	# CANCEL - DESELECT UNIT
+	if event.is_action_pressed("Cancel") and selected_unit != null \
+	and current_ctrl_mode == control_mode.free:
+		
+		move_selector(selected_unit.current_tile)
+		deselect_unit(selected_unit)
+	
+	# CANCEL (Select Actions)
+	elif event.is_action_pressed("Cancel") \
+	and current_ctrl_mode == control_mode.selecting_action:
+		
+		# Reset control mode, unit position, selector position, and redraw tiles
+		current_ctrl_mode = control_mode.free
+		selected_unit.action_buttons.set_invisible_after_time(0)
+		selected_unit.move_to(selected_unit.prev_tile)
+		selected_unit.current_tile = selected_unit.prev_tile
+		move_selector(selected_unit.current_tile)
+		redraw_move_tiles()
+	
+	# CANCEL (Attacking)
+	elif event.is_action_pressed("Cancel") \
+	and current_ctrl_mode == control_mode.attacking:
+		
+		current_ctrl_mode = control_mode.selecting_action
 	
 	# SELECTOR MOVEMENT INPUTS
-	if event.is_action_pressed("Up"):
-		move_selector(Vector2i(current_selector_pos.x, current_selector_pos.y - 1))
-		if selected_unit != null:
-			selected_unit.move_ghost.up()
-	elif event.is_action_pressed("Down"):
-		move_selector(Vector2i(current_selector_pos.x, current_selector_pos.y + 1))
-		if selected_unit != null:
-			selected_unit.move_ghost.down()
-	elif event.is_action_pressed("Left"):
-		move_selector(Vector2i(current_selector_pos.x - 1, current_selector_pos.y))
-		if selected_unit != null:
-			selected_unit.move_ghost.left()
-	elif event.is_action_pressed("Right"):
-		move_selector(Vector2i(current_selector_pos.x + 1, current_selector_pos.y))
-		if selected_unit != null:
-			selected_unit.move_ghost.right()
+	# Don't move selector while in select action mode
+	if current_ctrl_mode == control_mode.free:
+		if event.is_action_pressed("Up"):
+			move_selector(Vector2i(current_selector_pos.x, current_selector_pos.y - 1))
+			if selected_unit != null:
+				selected_unit.move_ghost.up()
+		elif event.is_action_pressed("Down"):
+			move_selector(Vector2i(current_selector_pos.x, current_selector_pos.y + 1))
+			if selected_unit != null:
+				selected_unit.move_ghost.down()
+		elif event.is_action_pressed("Left"):
+			move_selector(Vector2i(current_selector_pos.x - 1, current_selector_pos.y))
+			if selected_unit != null:
+				selected_unit.move_ghost.left()
+		elif event.is_action_pressed("Right"):
+			move_selector(Vector2i(current_selector_pos.x + 1, current_selector_pos.y))
+			if selected_unit != null:
+				selected_unit.move_ghost.right()
 
 # Moves the selector to a new position and deletes the old tile
 func move_selector(new_pos: Vector2i):
 	# IF NEW POS IS ON MAP --> MOVE
 	# When a unit is selected, move selector only if new pos is on a highlighted tile
-	if coordinate_map.has(new_pos) and (selected_unit == null or highlighted_tiles.has(new_pos)):
+	if coordinate_map.has(new_pos) and (selected_unit == null or active_move_tiles.has(new_pos)):
 		move_selector_sfx.play()
 		erase_cell(layers.selector, current_selector_pos)
 		set_cell(layers.selector, new_pos, selector_source, selector_atlus_pos)
@@ -108,6 +146,10 @@ func move_selector(new_pos: Vector2i):
 		if selected_unit != null:
 			selected_unit.move_ghost.visible = true
 			selected_unit.move_ghost.position = map_to_local(new_pos)
+
+# Hides the selector while not in free control mode
+func hide_selector():
+	erase_cell(layers.selector, current_selector_pos)
 
 # Check to see if any player units are being selected
 func check_for_selections():
@@ -128,30 +170,16 @@ func select_unit(unit: PlayerUnit):
 	selected_unit = unit
 	project_movement(unit.speed, unit.current_tile)
 
-# Displays movement tile highlights where the selected unit can move
-func project_movement(speed: int, origin: Vector2i):
-	draw_move_highlight(origin)
-	var width: int = speed
-	var height: int = 0
-	for n in speed+1:
-		for i in range(0, width+1):
-			draw_move_highlight(origin + Vector2i(i, height))
-			draw_move_highlight(origin + Vector2i(-i, height))
-			if height != 0:
-				draw_move_highlight(origin + Vector2i(i, -height))
-				draw_move_highlight(origin + Vector2i(-i, -height))
-		height += 1
-		width -= 1
-
-# Erases all highlighted movement cells
-# but does NOT clear the highlighted tiles array
-func hide_highlighted_tiles():
-	for tile in highlighted_tiles:
-		erase_cell(layers.h_level0, Vector2i(tile.x, tile.y))
+# Deselects the currently selected unit
+func deselect_unit(unit: PlayerUnit):
+	unit.set_game_state(unit.game_state.waiting)
+	selected_unit = null
+	delete_move_tiles()
 
 # Calls unit telling it to begin moving using A* algorithm
 # Sets selected unit to null
 func move_unit():
+	hide_move_tiles()
 	selected_unit.init_moving( \
 		get_path_astar( \
 				get_tilenode_from_coord_map(selected_unit.current_tile), \
@@ -159,13 +187,54 @@ func move_unit():
 			) \
 		)
 	selected_unit.move_ghost.visible = false
-	selected_unit = null
+
+# Displays movement tile highlights where the selected unit can move
+func project_movement(speed: int, origin: Vector2i):
+	draw_move_tile(origin)
+	var width: int = speed
+	var height: int = 0
+	for n in speed+1:
+		for i in range(0, width+1):
+			draw_move_tile(origin + Vector2i(i, height))
+			draw_move_tile(origin + Vector2i(-i, height))
+			if height != 0:
+				draw_move_tile(origin + Vector2i(i, -height))
+				draw_move_tile(origin + Vector2i(-i, -height))
+		height += 1
+		width -= 1
 
 # Draws a highlighted movement tile at a given tile
-func draw_move_highlight(tile: Vector2i):
+func draw_move_tile(tile: Vector2i):
 	if coordinate_map.has(tile):
 		set_cell(layers.h_level0, tile, movement_source, movement_atlus_pos)
-		highlighted_tiles.push_back(tile)
+		active_move_tiles.push_back(tile)
+
+# Draws existing move tiles
+func redraw_move_tiles():
+	for tile in active_move_tiles:
+		set_cell(layers.h_level0, tile, movement_source, movement_atlus_pos)
+
+# Erases all highlighted movement cells
+# but does NOT clear the highlighted tiles array
+func hide_move_tiles():
+	for tile in active_move_tiles:
+		erase_cell(layers.h_level0, Vector2i(tile.x, tile.y))
+
+# Erases all highlighted movement cells and clears the array
+func delete_move_tiles():
+	hide_move_tiles()
+	active_move_tiles.clear()
+
+# Displays movement tile highlights where the selected unit can move
+func project_attack(tiles: Array[Vector2i]):
+	for tile in tiles:
+		draw_attack_tile(tile + selected_unit.current_tile)
+
+# Draws tiles to be attacked
+func draw_attack_tile(tile: Vector2i):
+	if coordinate_map.has(tile):
+		set_cell(layers.h_level0, tile, attack_source, attack_atlus_pos)
+		active_attack_tiles.push_back(tile)
 
 # Creates a series of nodes that help perform pathfinding algorithms
 func init_coord_map():

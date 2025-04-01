@@ -39,7 +39,8 @@ enum control_mode{
 	free,
 	moving_unit,
 	selecting_action,
-	attacking
+	attacking,
+	locked
 }
 var current_ctrl_mode: control_mode
 
@@ -93,7 +94,7 @@ func _input(event):
 		move_selector(selected_unit.current_tile)
 		deselect_unit(selected_unit)
 	
-	# CANCEL (Select Actions)
+	# CANCEL - SELECT ACTIONS
 	elif event.is_action_pressed("Cancel") \
 	and current_ctrl_mode == control_mode.selecting_action:
 		
@@ -110,6 +111,8 @@ func _input(event):
 	and current_ctrl_mode == control_mode.attacking:
 		
 		current_ctrl_mode = control_mode.selecting_action
+		delete_attack_tiles()
+		selected_unit.action_buttons.init_action_buttons()
 	
 	# SELECTOR MOVEMENT INPUTS
 	# Don't move selector while in select action mode
@@ -229,6 +232,12 @@ func delete_move_tiles():
 func project_attack(tiles: Array[Vector2i]):
 	for tile in tiles:
 		draw_attack_tile(tile + selected_unit.current_tile)
+
+# Erases attack highlight tiles and clears the attack tile list
+func delete_attack_tiles():
+	for tile in active_attack_tiles:
+		erase_cell(layers.h_level0, Vector2i(tile.x, tile.y))
+	active_attack_tiles.clear()
 
 # Draws tiles to be attacked
 func draw_attack_tile(tile: Vector2i):
@@ -351,3 +360,13 @@ func get_tilenode_from_coord_map(tile: Vector2i) -> TileNode:
 		return coord_map_nodes[coordinate_map.find(tile)]
 	else:
 		return null
+
+# Handles logic whenever player unit ends turn
+func handle_end_turn():
+	current_ctrl_mode = control_mode.free
+	move_selector(selected_unit.current_tile)
+	deselect_unit(selected_unit)
+
+# Sets the controller's control mode
+func set_control_mode(mode: control_mode):
+	current_ctrl_mode = mode

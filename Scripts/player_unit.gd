@@ -91,7 +91,6 @@ func _process(delta):
 		if move_path.size() == 1:
 			prev_tile = current_tile
 			current_tile = move_path[0]
-			manager.grid.current_ctrl_mode = manager.grid.control_mode.selecting_action
 			set_game_state(game_state.select_action)
 
 # Initializes the unit to be used during a round of play
@@ -107,6 +106,7 @@ func attack():
 
 # Ends the unit's "turn"
 func end_turn():
+	manager.grid.handle_end_turn()
 	current_game_state = game_state.expended
 	modulate = Color.DARK_GRAY
 
@@ -225,6 +225,7 @@ func init_moving(path: Array[Vector2i]):
 # Initializes post-movement action selection for player
 func init_action_selection():
 	action_buttons.init_action_buttons()
+	manager.grid.set_control_mode(manager.grid.control_mode.selecting_action)
 
 # Ends any state based functionality relavent to game_state enum
 func cancel():

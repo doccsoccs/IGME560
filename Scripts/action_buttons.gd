@@ -49,7 +49,8 @@ func _process(_delta):
 				active_button.frame = button_frame.wait_pressed
 				owner.end_turn()
 			
-			set_invisible_after_time(0.35)
+			set_invisible_after_time(0.2)
+		
 		elif Input.is_action_just_released("Select"):
 			await get_tree().create_timer(0.25).timeout
 			if active_button == fight_button:
@@ -60,8 +61,12 @@ func _process(_delta):
 func set_invisible_after_time(time: float = 0.15):
 	active = false
 	await get_tree().create_timer(time).timeout
-	visible = false
+	if !active:
+		visible = false
 
 func init_action_buttons():
+	active_button = fight_button
+	fight_button.frame = button_frame.fight_hover
+	wait_button.frame = button_frame.wait_normal
 	active = true
 	visible = true

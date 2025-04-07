@@ -21,4 +21,4 @@ layer_6/z_index = 9
 script = ExtResource("2_yq4tw")
 
 [node name="DefaultCharacter" parent="UnitManager" instance=ExtResource("2_7tmfy")]
-attack_paths = Array[String](["res://Attack Patterns/slash.txt"])
+attack_paths = Array[String](["res://Attack Patterns/calamity.txt"])

@@ -102,7 +102,8 @@ func init_for_new_round():
 # Project an attack
 func attack():
 	manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
-	manager.grid.project_attack(get_attack_pattern(attack_paths[0]))
+	manager.grid.attack_patterns = get_attack_patterns(attack_paths[0])
+	manager.grid.project_attack(0)
 
 # Ends the unit's "turn"
 func end_turn():
@@ -121,7 +122,7 @@ func ghost_move_tile(new_tile: Vector2i):
 
 # Returns an array of tile positions representing an attack pattern 
 # facing down and centered at (0,0) 
-func get_attack_pattern(path: String) -> Array[Vector2i]:
+func get_attack_patterns(path: String) -> Array[Array]:
 	var file = FileAccess.open(path, FileAccess.READ)
 	var text = file.get_as_text()
 	var s: Array[String] = []
@@ -151,7 +152,41 @@ func get_attack_pattern(path: String) -> Array[Vector2i]:
 			if pattern_chars[r][c] == "x":
 				attack_tiles.push_back(Vector2i(c,r) - origin)
 	
-	return attack_tiles
+	# Save the pattern angled in each of 4 directions
+	var omni_dir_patterns: Array[Array]
+	var temp: Array[Vector2i] = []
+	omni_dir_patterns.push_back(attack_tiles)
+	
+	# UP Direction (1)
+	for tile in attack_tiles:
+		var diff = (origin.y - tile.y) * 2
+		temp.push_back(Vector2i(tile.x, tile.y + diff))
+	omni_dir_patterns.push_back(temp)
+	temp = []
+	
+	# LEFT Direction (2)
+	for tile in attack_tiles:
+		var x_diff = origin.x - tile.x
+		var y_diff = origin.y - tile.y
+		temp.push_back(Vector2i(-origin.y + y_diff, -origin.x + x_diff))
+	omni_dir_patterns.push_back(temp)
+	temp = []
+	
+	# RIGHT Direction (3)
+	for tile in attack_tiles:
+		var x_diff = origin.x - tile.x
+		var y_diff = origin.y - tile.y
+		temp.push_back(Vector2i(origin.y - y_diff, origin.x - x_diff))
+	omni_dir_patterns.push_back(temp)
+	temp = []
+	omni_dir_patterns.push_back(temp)
+	
+	# Down = 0
+	# Up = 1
+	# Left = 2
+	# Right = 3
+	
+	return omni_dir_patterns
 
 # Sets the unit's game state
 func set_game_state(new_state: game_state):

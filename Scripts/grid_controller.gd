@@ -24,6 +24,7 @@ var hovered_unit: PlayerUnit = null
 var selected_unit: PlayerUnit = null
 var active_move_tiles: Array[Vector2i]
 var active_attack_tiles: Array[Vector2i]
+var attack_patterns: Array[Array]
 
 enum layers{
 	level0 = 0,
@@ -34,6 +35,14 @@ enum layers{
 	h_level2 = 5,
 	selector = 6
 }
+
+enum directions{
+	up = 0,
+	down = 1,
+	left = 2,
+	right = 3
+}
+var current_attack_dir
 
 enum control_mode{
 	free,
@@ -133,6 +142,25 @@ func _input(event):
 			move_selector(Vector2i(current_selector_pos.x + 1, current_selector_pos.y))
 			if selected_unit != null:
 				selected_unit.move_ghost.right()
+	
+	# Directional Controls for Attacking Units
+	if current_ctrl_mode == control_mode.attacking:
+		if event.is_action_pressed("Down"):
+			current_attack_dir = directions.up
+			delete_attack_tiles()
+			project_attack(current_attack_dir)
+		elif event.is_action_pressed("Up"):
+			current_attack_dir = directions.down
+			delete_attack_tiles()
+			project_attack(current_attack_dir)
+		elif event.is_action_pressed("Left"):
+			current_attack_dir = directions.left
+			delete_attack_tiles()
+			project_attack(current_attack_dir)
+		elif event.is_action_pressed("Right"):
+			current_attack_dir = directions.right
+			delete_attack_tiles()
+			project_attack(current_attack_dir)
 
 # Moves the selector to a new position and deletes the old tile
 func move_selector(new_pos: Vector2i):
@@ -229,8 +257,8 @@ func delete_move_tiles():
 	active_move_tiles.clear()
 
 # Displays movement tile highlights where the selected unit can move
-func project_attack(tiles: Array[Vector2i]):
-	for tile in tiles:
+func project_attack(index: int):
+	for tile in attack_patterns[index]:
 		draw_attack_tile(tile + selected_unit.current_tile)
 
 # Erases attack highlight tiles and clears the attack tile list

@@ -26,6 +26,14 @@ enum anim_state{
 	walk,
 	walk_fb
 }
+
+enum facing_state{
+	down = 0,
+	up = 1,
+	left = 2,
+	right = 3
+}
+var current_facing_state: facing_state
 #endregion
 
 var prev_tile: Vector2i
@@ -57,6 +65,7 @@ const initial_anim: anim_state = anim_state.idle
 
 func _ready():
 	update_animations(initial_anim)
+	current_facing_state = facing_state.down
 	current_game_state = initial_game_state
 	await get_tree().create_timer(0.1).timeout
 	current_tile = loc_to_map(global_position)
@@ -103,7 +112,7 @@ func init_for_new_round():
 func attack():
 	manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
 	manager.grid.attack_patterns = get_attack_patterns(attack_paths[0])
-	manager.grid.project_attack(0)
+	manager.grid.project_attack(current_facing_state)
 
 # Ends the unit's "turn"
 func end_turn():
@@ -267,20 +276,43 @@ func cancel():
 	select_key.visible = false
 	move_ghost.visible = false
 
+# Sets the unit's animation state and flipped property (IDLE ONLY)
+func set_facing(facing: facing_state):
+	if facing == facing_state.left: # LEFT
+		current_facing_state = facing_state.left
+		update_animations(anim_state.idle_fb)
+		flip_h = false
+	if facing == facing_state.down: # DOWN
+		current_facing_state = facing_state.down
+		update_animations(anim_state.idle)
+		flip_h = false
+	if facing == facing_state.right: # RIGHT
+		current_facing_state = facing_state.right
+		update_animations(anim_state.idle)
+		flip_h = true
+	if facing == facing_state.up: # UP
+		current_facing_state = facing_state.up
+		update_animations(anim_state.idle_fb)
+		flip_h = true
+
 # Changes animations based on unit movement
 func set_move_animation(target_pos: Vector2i):
 	var dir: Vector2 = (map_to_loc(target_pos) - position).normalized()
 	if dir.x < 0 and dir.y < 0: # LEFT
 		update_animations(anim_state.walk_fb)
+		current_facing_state = facing_state.left
 		flip_h = false
 	if dir.x < 0 and dir.y > 0: # DOWN
 		update_animations(anim_state.walk)
+		current_facing_state = facing_state.down
 		flip_h = false
 	if dir.x > 0 and dir.y > 0: # RIGHT
 		update_animations(anim_state.walk)
+		current_facing_state = facing_state.right
 		flip_h = true
-	if dir.x > 0 and dir.y < 0:
+	if dir.x > 0 and dir.y < 0: # UP
 		update_animations(anim_state.walk_fb)
+		current_facing_state = facing_state.up
 		flip_h = true
 
 # Shortcut for map -> local conversion

@@ -37,8 +37,8 @@ enum layers{
 }
 
 enum directions{
-	up = 0,
-	down = 1,
+	down = 0,
+	up = 1,
 	left = 2,
 	right = 3
 }
@@ -146,19 +146,23 @@ func _input(event):
 	# Directional Controls for Attacking Units
 	if current_ctrl_mode == control_mode.attacking:
 		if event.is_action_pressed("Down"):
-			current_attack_dir = directions.up
+			current_attack_dir = directions.down
+			selected_unit.set_facing(selected_unit.facing_state.down)
 			delete_attack_tiles()
 			project_attack(current_attack_dir)
 		elif event.is_action_pressed("Up"):
-			current_attack_dir = directions.down
+			current_attack_dir = directions.up
+			selected_unit.set_facing(selected_unit.facing_state.up)
 			delete_attack_tiles()
 			project_attack(current_attack_dir)
 		elif event.is_action_pressed("Left"):
 			current_attack_dir = directions.left
+			selected_unit.set_facing(selected_unit.facing_state.left)
 			delete_attack_tiles()
 			project_attack(current_attack_dir)
 		elif event.is_action_pressed("Right"):
 			current_attack_dir = directions.right
+			selected_unit.set_facing(selected_unit.facing_state.right)
 			delete_attack_tiles()
 			project_attack(current_attack_dir)
 

@@ -43,7 +43,7 @@ func _process(_delta):
 			
 			if active_button == fight_button: # FIGHT
 				active_button.frame = button_frame.fight_pressed
-				owner.attack()
+				owner.show_attack()
 			
 			elif active_button == wait_button: # WAIT
 				active_button.frame = button_frame.wait_pressed

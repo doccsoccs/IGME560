@@ -20,8 +20,8 @@ var coord_map_nodes: Array[TileNode]
 @export var TILE_NODE: PackedScene
 
 # Temp Data
-var hovered_unit: PlayerUnit = null
-var selected_unit: PlayerUnit = null
+var hovered_unit: Unit = null
+var selected_unit: Unit = null
 var active_move_tiles: Array[Vector2i]
 var active_attack_tiles: Array[Vector2i]
 var attack_patterns: Array[Array]
@@ -82,19 +82,26 @@ func _ready():
 
 # Input Events
 func _input(event):
-	# SELECT UNIT
+	# SELECT - SELECT UNIT
 	if event.is_action_pressed("Select") and hovered_unit != null and selected_unit == null \
 	and current_ctrl_mode == control_mode.free:
 		
 		select_unit(hovered_unit)
 	
-	# MOVE SELECTED UNIT
+	# SELECT - MOVE UNIT
 	elif event.is_action_pressed("Select") and selected_unit != null \
 	and current_ctrl_mode == control_mode.free:
 		
 		current_ctrl_mode = control_mode.moving_unit
 		move_unit()
 		hide_selector()
+	
+	# SELECT - ATTACK
+	elif event.is_action_pressed("Select") and selected_unit != null \
+	and current_ctrl_mode == control_mode.attacking:
+		
+		current_ctrl_mode = control_mode.locked
+		attack_active_tiles()
 	
 	# CANCEL - DESELECT UNIT
 	if event.is_action_pressed("Cancel") and selected_unit != null \
@@ -115,13 +122,17 @@ func _input(event):
 		move_selector(selected_unit.current_tile)
 		redraw_move_tiles()
 	
-	# CANCEL (Attacking)
+	# CANCEL - ATTACKING
 	elif event.is_action_pressed("Cancel") \
 	and current_ctrl_mode == control_mode.attacking:
 		
 		current_ctrl_mode = control_mode.selecting_action
 		delete_attack_tiles()
 		selected_unit.action_buttons.init_action_buttons()
+		
+		# Hide all damage indicators
+		for unit in unit_manager.units:
+			unit.hide_damage_indicator()
 	
 	# SELECTOR MOVEMENT INPUTS
 	# Don't move selector while in select action mode
@@ -175,12 +186,15 @@ func move_selector(new_pos: Vector2i):
 		erase_cell(layers.selector, current_selector_pos)
 		set_cell(layers.selector, new_pos, selector_source, selector_atlus_pos)
 		current_selector_pos = new_pos
-		check_for_selections()
 		
 		# Display a ghost unit if moving the selector while a unit is selected
 		if selected_unit != null:
 			selected_unit.move_ghost.visible = true
-			selected_unit.move_ghost.position = map_to_local(new_pos)
+			selected_unit.ghost_move_tile(new_pos)
+		
+		# Only check for potential selections while not selecting something
+		else:
+			check_for_selections()
 
 # Hides the selector while not in free control mode
 func hide_selector():
@@ -199,14 +213,14 @@ func check_for_selections():
 			hovered_unit = null
 
 # Selects the hovered unit
-func select_unit(unit: PlayerUnit):
+func select_unit(unit: Unit):
 	unit.set_game_state(unit.game_state.selected)
 	hovered_unit = null
 	selected_unit = unit
-	project_movement(unit.speed, unit.current_tile)
+	project_movement(unit.range_stat, unit.current_tile)
 
 # Deselects the currently selected unit
-func deselect_unit(unit: PlayerUnit):
+func deselect_unit(unit: Unit):
 	unit.set_game_state(unit.game_state.waiting)
 	selected_unit = null
 	delete_move_tiles()
@@ -224,11 +238,11 @@ func move_unit():
 	selected_unit.move_ghost.visible = false
 
 # Displays movement tile highlights where the selected unit can move
-func project_movement(speed: int, origin: Vector2i):
+func project_movement(range_stat: int, origin: Vector2i):
 	draw_move_tile(origin)
-	var width: int = speed
+	var width: int = range_stat
 	var height: int = 0
-	for n in speed+1:
+	for n in range_stat+1:
 		for i in range(0, width+1):
 			draw_move_tile(origin + Vector2i(i, height))
 			draw_move_tile(origin + Vector2i(-i, height))
@@ -262,8 +276,19 @@ func delete_move_tiles():
 
 # Displays movement tile highlights where the selected unit can move
 func project_attack(index: int):
+	# Hide all damage indicators to start
+	for unit in unit_manager.units:
+		unit.hide_damage_indicator()
+	
+	# Draw tiles
 	for tile in attack_patterns[index]:
 		draw_attack_tile(tile + selected_unit.current_tile)
+	
+	# Check tiles for units within the attack range_stat
+	for tile in active_attack_tiles:
+		var unit = unit_manager.get_unit_at_tile(tile)
+		if unit != null:
+			unit.show_damage_indicator()
 
 # Erases attack highlight tiles and clears the attack tile list
 func delete_attack_tiles():
@@ -276,6 +301,12 @@ func draw_attack_tile(tile: Vector2i):
 	if coordinate_map.has(tile):
 		set_cell(layers.h_level0, tile, attack_source, attack_atlus_pos)
 		active_attack_tiles.push_back(tile)
+
+# The selected unit attacks all active attack tiles
+func attack_active_tiles():
+	var units_to_attack: Array[Unit] = unit_manager.get_units_in_tile_list(active_attack_tiles)
+	for unit in units_to_attack:
+		unit.take_damage(unit_manager.calc_damage(selected_unit, unit))
 
 # Creates a series of nodes that help perform pathfinding algorithms
 func init_coord_map():

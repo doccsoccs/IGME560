@@ -1,14 +1,30 @@
 extends Sprite2D
-class_name PlayerUnit
+class_name Unit
 
 # PLAYER Z-INDECES
 # Level 0 = 2, Level 1 = 5, Level 2 = 8
 
-#region UNIT STATISTICS
-var speed: int = 4
-#endregion
+const is_player: bool = true
 
-@export var attack_paths: Array[String]
+#region UNIT STATISTICS
+@export_category("STATS")
+@export var max_hp: int = 20
+var hp: int 
+@export var range_stat: int = 4
+@export var attack: int = 50
+@export var defense: int = 50
+@export var skill: int = 50
+@export var type: typing
+
+@export_category("ATTACK")
+@export var attack_path: String
+@export var attack_base_power: int
+@export var attack_type: typing
+
+@export_category("MAP POSITION")
+@export var start_tile: Vector2i
+@export var start_facing: facing_state
+#endregion
 
 #region STATE MACHINES
 enum game_state{
@@ -34,13 +50,22 @@ enum facing_state{
 	right = 3
 }
 var current_facing_state: facing_state
+
+enum typing{
+	water = 0,
+	earth = 1,
+	fire = 2,
+	air = 3,
+	shadow = 4,
+	light = 5
+}
 #endregion
 
 var prev_tile: Vector2i
 var current_tile: Vector2i
 
 #region MOVEMENT
-const move_speed: float = 55
+const move_range: float = 55
 var direction: Vector2
 var velocity: Vector2
 const min_dist_detection: float = 2
@@ -58,6 +83,11 @@ const initial_anim: anim_state = anim_state.idle
 @onready var select_key = $SelectKeyIndicator
 @onready var move_ghost = $MovementGhost
 @onready var action_buttons = $ActionButtons
+@onready var damage_overhead = $DamageOverhead
+@onready var damage_label = $DamageOverhead/DamageLabel
+@onready var percent_to_hit_label = $DamageOverhead/PercentToHitLabel
+@onready var health_label = $HealthBar/HealthLabel
+@onready var type_indicator = $HealthBar/TypeIndicator
 @onready var manager = $".."
 
 ## SFX
@@ -68,8 +98,19 @@ func _ready():
 	current_facing_state = facing_state.down
 	current_game_state = initial_game_state
 	await get_tree().create_timer(0.1).timeout
+	
+	# Init stats
+	hp = max_hp
+	health_label.text = str(hp)
+	type_indicator.frame = type
+	
+	# Set initial position
+	position = map_to_loc(start_tile)
 	current_tile = loc_to_map(global_position)
 	prev_tile = current_tile
+	
+	# Set initial orientation
+	set_facing(start_facing)
 
 func _process(delta):
 	# Moves the unit if movement has been initialized
@@ -77,7 +118,7 @@ func _process(delta):
 	if move_path.size() > 1:
 		# Move unit towards the next tile in the path
 		direction = (Vector2)(map_to_loc(move_path[1]) - map_to_loc(move_path[0])).normalized()
-		velocity = direction * move_speed * delta
+		velocity = direction * move_range * delta
 		position += velocity
 		
 		# Make sure unit locks onto each tile in path
@@ -107,11 +148,18 @@ func init_for_new_round():
 	current_game_state = game_state.waiting
 	modulate = Color.WHITE
 
+# Called when this unit takes damage from an attack
+func take_damage(damage: int):
+	hp -= damage
+	if hp <= 0:
+		hp = 0
+	health_label.text = str(hp)
+
 # Inform manager to change control mode to ATTACKING
 # Project an attack
-func attack():
+func show_attack():
 	manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
-	manager.grid.attack_patterns = get_attack_patterns(attack_paths[0])
+	manager.grid.attack_patterns = get_attack_patterns(attack_path)
 	manager.grid.project_attack(current_facing_state)
 
 # Ends the unit's "turn"
@@ -127,7 +175,17 @@ func move_to(target: Vector2i):
 # Moves a ghost of a player character unit
 # Typically along with the cursor
 func ghost_move_tile(new_tile: Vector2i):
-	move_ghost.position = map_to_loc(new_tile)
+	move_ghost.global_position = map_to_loc(new_tile)
+
+# Show the damage indicator for some attack
+func show_damage_indicator():
+	damage_label.text = str(manager.calc_damage_for_display(manager.grid.selected_unit, self))
+	damage_overhead.visible = true
+
+# Hide the damage indicator after an attack is declared 
+# or when the projected attack stops hovering on unit
+func hide_damage_indicator():
+	damage_overhead.visible = false
 
 # Returns an array of tile positions representing an attack pattern 
 # facing down and centered at (0,0) 

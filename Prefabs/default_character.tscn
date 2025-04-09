@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://beifeixysoyl6"]
+[gd_scene load_steps=34 format=3 uid="uid://beifeixysoyl6"]
 
 [ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_xnvij"]
 [ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_vccjh"]
@@ -6,9 +6,16 @@
 [ext_resource type="Texture2D" uid="uid://de7wauh0j6pb2" path="res://Sprites/Characters/clockwing_walk_faceback.png" id="4_2l1w2"]
 [ext_resource type="PackedScene" uid="uid://cm28u8g72cdbd" path="res://Prefabs/UI/select_key_indicator.tscn" id="5_b1ky1"]
 [ext_resource type="Texture2D" uid="uid://xdp6dhkybrou" path="res://Sprites/Characters/clockwing_idle_faceback.png" id="5_okv2c"]
+[ext_resource type="Texture2D" uid="uid://bfgbx1g670wua" path="res://Sprites/UI/damage_overhead.png" id="6_87qyq"]
 [ext_resource type="PackedScene" uid="uid://ckstdvx1288y8" path="res://Prefabs/Unit Ghosts/default_character_ghost.tscn" id="6_fnvkf"]
+[ext_resource type="FontFile" uid="uid://dp5c3byjts7yw" path="res://Sprites/UI/dogica/OTF/dogica.otf" id="7_64uyg"]
 [ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="7_x680m"]
+[ext_resource type="FontFile" uid="uid://c4aoq70jhlfo" path="res://Sprites/UI/dogica/TTF/dogica.ttf" id="8_0vq2s"]
 [ext_resource type="PackedScene" uid="uid://vofy6gq6oex7" path="res://Prefabs/UI/action_buttons.tscn" id="8_fr38c"]
+[ext_resource type="Texture2D" uid="uid://bb02s0y20ll1" path="res://Sprites/UI/typeindicators.png" id="13_fbdjb"]
+[ext_resource type="Texture2D" uid="uid://d0bp8bl0nsupj" path="res://Sprites/Attack Particles/waterbubble.png" id="14_lgl43"]
+[ext_resource type="Texture2D" uid="uid://bly517w00tmda" path="res://Sprites/Attack Particles/rock.png" id="15_0qm0j"]
+[ext_resource type="Texture2D" uid="uid://c7dwjvnbvgoks" path="res://Sprites/Attack Particles/ember.png" id="15_i8f2u"]
 
 [sub_resource type="Animation" id="Animation_6y2sy"]
 length = 0.001
@@ -220,6 +227,91 @@ _data = {
 "walk_faceback": SubResource("Animation_l0of1")
 }
 
+[sub_resource type="LabelSettings" id="LabelSettings_1fdbt"]
+font = ExtResource("8_0vq2s")
+font_size = 8
+font_color = Color(1, 0.956863, 0.678431, 1)
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.427451)
+shadow_offset = Vector2(0.5, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_qexd2"]
+font = ExtResource("8_0vq2s")
+font_size = 8
+font_color = Color(0.984314, 0.721569, 0.635294, 1)
+shadow_color = Color(0, 0, 0, 0.360784)
+
+[sub_resource type="LabelSettings" id="LabelSettings_6dt27"]
+font_size = 8
+outline_size = 1
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_xyfvi"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, -32, 0)
+emission_shape = 3
+emission_box_extents = Vector3(8, 1, 1)
+direction = Vector3(0, 1, 0)
+gravity = Vector3(0, 98, 0)
+scale_min = 0.25
+scale_max = 0.75
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_0qaov"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, -52, 0)
+inherit_velocity_ratio = 1.0
+direction = Vector3(0, 1, 0)
+spread = 0.0
+initial_velocity_min = 75.0
+initial_velocity_max = 75.0
+gravity = Vector3(0, 50, 0)
+scale_min = 2.0
+scale_max = 2.0
+
+[sub_resource type="Curve" id="Curve_7cdmk"]
+_data = [Vector2(0.253333, 0.989011), 0.0, 0.0, 0, 0, Vector2(0.64, 0.197802), -4.78022, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_ls3xd"]
+curve = SubResource("Curve_7cdmk")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_gyh0b"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(5, 0, 1)
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 100.0
+initial_velocity_max = 100.0
+angular_velocity_min = -15.0
+angular_velocity_max = 15.0
+gravity = Vector3(0, 250, 0)
+scale_min = 0.5
+scale_max = 0.75
+scale_curve = SubResource("CurveTexture_ls3xd")
+
+[sub_resource type="Curve" id="Curve_6pm2l"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.98, 0.131868), -4.12088, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_fdfuk"]
+curve = SubResource("Curve_6pm2l")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ac5l6"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, -4, 0)
+emission_shape = 1
+emission_sphere_radius = 4.0
+direction = Vector3(0, -1, 0)
+spread = 20.0
+flatness = 0.2
+initial_velocity_min = 30.0
+initial_velocity_max = 50.0
+scale_min = 0.5
+scale_curve = SubResource("CurveTexture_fdfuk")
+turbulence_noise_strength = 0.2
+turbulence_noise_scale = 1.0
+
 [node name="DefaultCharacter" type="Sprite2D"]
 z_index = 3
 y_sort_enabled = true
@@ -233,6 +325,58 @@ libraries = {
 "": SubResource("AnimationLibrary_tulgk")
 }
 
+[node name="DamageOverhead" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(0, -36)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("6_87qyq")
+
+[node name="DamageLabel" type="Label" parent="DamageOverhead"]
+y_sort_enabled = true
+anchors_preset = -1
+anchor_left = 0.062
+anchor_top = 0.115
+anchor_right = 0.937
+anchor_bottom = 0.458
+offset_left = -15.984
+offset_top = -16.0133
+offset_right = -15.984
+offset_bottom = -15.9893
+grow_horizontal = 2
+size_flags_horizontal = 6
+size_flags_vertical = 8
+theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_font_sizes/font_size = 8
+text = "999"
+label_settings = SubResource("LabelSettings_1fdbt")
+horizontal_alignment = 1
+vertical_alignment = 1
+text_direction = 1
+
+[node name="PercentToHitLabel" type="Label" parent="DamageOverhead"]
+y_sort_enabled = true
+anchors_preset = -1
+anchor_left = 0.167
+anchor_top = 0.583
+anchor_right = 0.867
+anchor_bottom = 0.758
+offset_left = -16.0107
+offset_top = -15.9893
+offset_right = -6.41067
+offset_bottom = -13.5893
+grow_horizontal = 2
+scale = Vector2(0.7, 0.7)
+size_flags_horizontal = 6
+size_flags_vertical = 8
+theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_font_sizes/font_size = 8
+text = "100%"
+label_settings = SubResource("LabelSettings_qexd2")
+horizontal_alignment = 1
+vertical_alignment = 1
+text_direction = 1
+metadata/_edit_use_anchors_ = true
+
 [node name="SelectKeyIndicator" parent="." instance=ExtResource("5_b1ky1")]
 visible = false
 
@@ -241,8 +385,78 @@ visible = false
 
 [node name="ActionButtons" parent="." instance=ExtResource("8_fr38c")]
 visible = false
+z_index = 1
 position = Vector2(26, -23)
+
+[node name="HealthBar" type="Node2D" parent="."]
+
+[node name="TypeIndicator" type="Sprite2D" parent="HealthBar"]
+position = Vector2(5.5, 1)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("13_fbdjb")
+hframes = 6
+
+[node name="HealthLabel" type="Label" parent="HealthBar"]
+y_sort_enabled = true
+anchors_preset = -1
+anchor_left = 0.062
+anchor_top = 0.115
+anchor_right = 0.937
+anchor_bottom = 0.458
+offset_left = -12.0
+offset_top = -1.0
+offset_right = 6.0
+offset_bottom = 6.0
+grow_horizontal = 2
+scale = Vector2(0.75, 0.75)
+size_flags_horizontal = 6
+size_flags_vertical = 8
+theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_font_sizes/font_size = 8
+text = "99
+"
+label_settings = SubResource("LabelSettings_6dt27")
+horizontal_alignment = 2
+vertical_alignment = 1
+text_direction = 1
 
 [node name="SelectSFX" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("7_x680m")
 volume_db = 1.0
+
+[node name="WaterAttackParticles" type="GPUParticles2D" parent="."]
+visible = false
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_xyfvi")
+texture = ExtResource("14_lgl43")
+lifetime = 0.8
+one_shot = true
+speed_scale = 1.2
+trail_sections = 4
+
+[node name="EarthAttackParticles" type="GPUParticles2D" parent="."]
+visible = false
+emitting = false
+amount = 1
+process_material = SubResource("ParticleProcessMaterial_0qaov")
+texture = ExtResource("15_0qm0j")
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+
+[node name="EarthFollowupParticles" type="GPUParticles2D" parent="EarthAttackParticles"]
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_gyh0b")
+texture = ExtResource("15_0qm0j")
+lifetime = 0.7
+one_shot = true
+explosiveness = 0.9
+
+[node name="FireAttackParticles" type="GPUParticles2D" parent="."]
+visible = false
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_ac5l6")
+texture = ExtResource("15_i8f2u")
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.8

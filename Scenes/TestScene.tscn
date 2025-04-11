@@ -22,14 +22,33 @@ script = ExtResource("2_yq4tw")
 
 [node name="DefaultCharacter" parent="UnitManager" instance=ExtResource("2_7tmfy")]
 type = 1
-attack_path = "res://Attack Patterns/slash.txt"
+attack_path = "res://Attack Patterns/calamity.txt"
 attack_base_power = 100
+attack_type = 1
 start_tile = Vector2i(-2, 1)
 start_facing = 1
 
 [node name="DefaultCharacter2" parent="UnitManager" instance=ExtResource("2_7tmfy")]
-type = 4
+type = 5
 attack_path = "res://Attack Patterns/ember.txt"
 attack_base_power = 100
-attack_type = 4
+attack_type = 5
 start_facing = 1
+
+[node name="DefaultCharacter3" parent="UnitManager" instance=ExtResource("2_7tmfy")]
+attack = 60
+defense = 30
+type = 3
+attack_path = "res://Attack Patterns/slash.txt"
+attack_base_power = 100
+attack_type = 3
+start_tile = Vector2i(0, -2)
+
+[node name="DefaultCharacter4" parent="UnitManager" instance=ExtResource("2_7tmfy")]
+range_stat = 5
+attack = 30
+defense = 30
+skill = 60
+attack_path = "res://Attack Patterns/slash.txt"
+attack_base_power = 80
+start_tile = Vector2i(2, 0)

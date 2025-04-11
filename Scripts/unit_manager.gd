@@ -2,9 +2,9 @@ extends Node2D
 
 @onready var grid = $"../IsometricGrid"
 
-var units: Array[Sprite2D]
-var player_units: Array[Sprite2D]
-var enemy_units: Array[Sprite2D]
+var units: Array[Unit]
+var player_units: Array[Unit]
+var enemy_units: Array[Unit]
 
 # Type Multipliers
 const neutral: float = 1.0
@@ -19,6 +19,13 @@ func _ready():
 			if unit.is_player:
 				player_units.push_back(unit)
 
+# Returns an array containing all positions of active units
+func get_all_unit_positions() -> Array[Vector2i]:
+	var unit_positions: Array[Vector2i] = []
+	for unit in units:
+		unit_positions.push_back(unit.current_tile)
+	return unit_positions
+
 # Checks the full unit array for a unit at some position
 # Returns that unit if exists
 func get_unit_at_tile(tile: Vector2i) -> Unit:
@@ -29,7 +36,7 @@ func get_unit_at_tile(tile: Vector2i) -> Unit:
 
 # Returns an array of units that are detected within a set of tiles
 func get_units_in_tile_list(tiles: Array[Vector2i]) -> Array[Unit]:
-	var attacked_units: Array[Unit]
+	var attacked_units: Array[Unit] = []
 	for tile in tiles:
 		var temp: Unit = get_unit_at_tile(tile)
 		if temp != null:

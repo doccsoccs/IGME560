@@ -89,6 +89,7 @@ const initial_anim: anim_state = anim_state.idle
 @onready var health_label = $HealthBar/HealthLabel
 @onready var type_indicator = $HealthBar/TypeIndicator
 @onready var manager = $".."
+@onready var particle_manager = $ParticleManager
 
 ## SFX
 @onready var select_sfx = $SelectSFX
@@ -149,7 +150,8 @@ func init_for_new_round():
 	modulate = Color.WHITE
 
 # Called when this unit takes damage from an attack
-func take_damage(damage: int):
+func take_damage(damage: int, damage_type: typing):
+	particle_manager.emit_particles(damage_type)
 	hp -= damage
 	if hp <= 0:
 		hp = 0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://beifeixysoyl6"]
+[gd_scene load_steps=56 format=3 uid="uid://beifeixysoyl6"]
 
 [ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_xnvij"]
 [ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_vccjh"]
@@ -12,10 +12,13 @@
 [ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="7_x680m"]
 [ext_resource type="FontFile" uid="uid://c4aoq70jhlfo" path="res://Sprites/UI/dogica/TTF/dogica.ttf" id="8_0vq2s"]
 [ext_resource type="PackedScene" uid="uid://vofy6gq6oex7" path="res://Prefabs/UI/action_buttons.tscn" id="8_fr38c"]
+[ext_resource type="Script" path="res://Scripts/particle_manager.gd" id="13_er3pj"]
 [ext_resource type="Texture2D" uid="uid://bb02s0y20ll1" path="res://Sprites/UI/typeindicators.png" id="13_fbdjb"]
 [ext_resource type="Texture2D" uid="uid://d0bp8bl0nsupj" path="res://Sprites/Attack Particles/waterbubble.png" id="14_lgl43"]
 [ext_resource type="Texture2D" uid="uid://bly517w00tmda" path="res://Sprites/Attack Particles/rock.png" id="15_0qm0j"]
 [ext_resource type="Texture2D" uid="uid://c7dwjvnbvgoks" path="res://Sprites/Attack Particles/ember.png" id="15_i8f2u"]
+[ext_resource type="Texture2D" uid="uid://bkqfrwbmmk0a3" path="res://Sprites/Attack Particles/airstream.png" id="17_ssoto"]
+[ext_resource type="Texture2D" uid="uid://bl12v4a7frewu" path="res://Sprites/Attack Particles/light.png" id="18_086yg"]
 
 [sub_resource type="Animation" id="Animation_6y2sy"]
 length = 0.001
@@ -247,6 +250,13 @@ font_size = 8
 outline_size = 1
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="Curve" id="Curve_taqby"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.153846), -2.77223, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_urgfc"]
+curve = SubResource("Curve_taqby")
+
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_xyfvi"]
 particle_flag_disable_z = true
 emission_shape_offset = Vector3(0, -32, 0)
@@ -256,18 +266,24 @@ direction = Vector3(0, 1, 0)
 gravity = Vector3(0, 98, 0)
 scale_min = 0.25
 scale_max = 0.75
+alpha_curve = SubResource("CurveTexture_urgfc")
+
+[sub_resource type="Gradient" id="Gradient_y3f5j"]
+offsets = PackedFloat32Array(0.754098, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_rx018"]
+gradient = SubResource("Gradient_y3f5j")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_0qaov"]
 particle_flag_disable_z = true
 emission_shape_offset = Vector3(0, -52, 0)
-inherit_velocity_ratio = 1.0
 direction = Vector3(0, 1, 0)
 spread = 0.0
-initial_velocity_min = 75.0
-initial_velocity_max = 75.0
-gravity = Vector3(0, 50, 0)
+gravity = Vector3(0, 150, 0)
 scale_min = 2.0
 scale_max = 2.0
+color_ramp = SubResource("GradientTexture1D_rx018")
 
 [sub_resource type="Curve" id="Curve_7cdmk"]
 _data = [Vector2(0.253333, 0.989011), 0.0, 0.0, 0, 0, Vector2(0.64, 0.197802), -4.78022, 0.0, 0, 0]
@@ -290,6 +306,13 @@ scale_min = 0.5
 scale_max = 0.75
 scale_curve = SubResource("CurveTexture_ls3xd")
 
+[sub_resource type="Curve" id="Curve_63kyb"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.494505), -4.12088, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_gp46h"]
+curve = SubResource("Curve_63kyb")
+
 [sub_resource type="Curve" id="Curve_6pm2l"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.98, 0.131868), -4.12088, 0.0, 0, 0]
 point_count = 2
@@ -299,7 +322,6 @@ curve = SubResource("Curve_6pm2l")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ac5l6"]
 particle_flag_disable_z = true
-emission_shape_offset = Vector3(0, -4, 0)
 emission_shape = 1
 emission_sphere_radius = 4.0
 direction = Vector3(0, -1, 0)
@@ -309,8 +331,69 @@ initial_velocity_min = 30.0
 initial_velocity_max = 50.0
 scale_min = 0.5
 scale_curve = SubResource("CurveTexture_fdfuk")
+alpha_curve = SubResource("CurveTexture_gp46h")
 turbulence_noise_strength = 0.2
 turbulence_noise_scale = 1.0
+
+[sub_resource type="Curve" id="Curve_0s3qq"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.043956), -9.68407, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_60fqw"]
+curve = SubResource("Curve_0s3qq")
+
+[sub_resource type="Curve" id="Curve_se7yu"]
+_data = [Vector2(0.0466667, 0.406593), 0.0, 0.268336, 0, 0, Vector2(0.68, 0.252747), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_4mmr8"]
+curve = SubResource("Curve_se7yu")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_j7fwx"]
+particle_flag_disable_z = true
+gravity = Vector3(0, -48, 0)
+scale_curve = SubResource("CurveTexture_4mmr8")
+alpha_curve = SubResource("CurveTexture_60fqw")
+
+[sub_resource type="Curve" id="Curve_qxhsu"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.746667, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.208791), -4.56467, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_8awxs"]
+curve = SubResource("Curve_qxhsu")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_q8jwm"]
+particle_flag_disable_z = true
+gravity = Vector3(0, -18, 0)
+color = Color(0.415686, 0, 0.419608, 0.933333)
+alpha_curve = SubResource("CurveTexture_8awxs")
+
+[sub_resource type="Curve" id="Curve_huest"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.153333, 0.879121), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(0.826667, 0.879121), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="CurveTexture" id="CurveTexture_30u76"]
+curve = SubResource("Curve_huest")
+
+[sub_resource type="Curve" id="Curve_ds2lc"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_isw7b"]
+curve = SubResource("Curve_ds2lc")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1353w"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 3.0
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 10.0
+initial_velocity_max = 20.0
+gravity = Vector3(0, -24, 0)
+scale_min = 0.25
+scale_max = 0.75
+scale_curve = SubResource("CurveTexture_isw7b")
+alpha_curve = SubResource("CurveTexture_30u76")
 
 [node name="DefaultCharacter" type="Sprite2D"]
 z_index = 3
@@ -420,12 +503,10 @@ horizontal_alignment = 2
 vertical_alignment = 1
 text_direction = 1
 
-[node name="SelectSFX" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("7_x680m")
-volume_db = 1.0
+[node name="ParticleManager" type="Node2D" parent="."]
+script = ExtResource("13_er3pj")
 
-[node name="WaterAttackParticles" type="GPUParticles2D" parent="."]
-visible = false
+[node name="WaterAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_xyfvi")
 texture = ExtResource("14_lgl43")
@@ -434,17 +515,16 @@ one_shot = true
 speed_scale = 1.2
 trail_sections = 4
 
-[node name="EarthAttackParticles" type="GPUParticles2D" parent="."]
-visible = false
+[node name="EarthAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 amount = 1
 process_material = SubResource("ParticleProcessMaterial_0qaov")
 texture = ExtResource("15_0qm0j")
-lifetime = 0.5
+lifetime = 0.8
 one_shot = true
 explosiveness = 1.0
 
-[node name="EarthFollowupParticles" type="GPUParticles2D" parent="EarthAttackParticles"]
+[node name="EarthFollowupParticles" type="GPUParticles2D" parent="ParticleManager/EarthAttackParticles"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_gyh0b")
 texture = ExtResource("15_0qm0j")
@@ -452,11 +532,33 @@ lifetime = 0.7
 one_shot = true
 explosiveness = 0.9
 
-[node name="FireAttackParticles" type="GPUParticles2D" parent="."]
-visible = false
+[node name="FireAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_ac5l6")
 texture = ExtResource("15_i8f2u")
 lifetime = 0.8
 one_shot = true
 explosiveness = 0.8
+
+[node name="AirAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_j7fwx")
+texture = ExtResource("17_ssoto")
+one_shot = true
+
+[node name="ShadowAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_q8jwm")
+texture = ExtResource("17_ssoto")
+lifetime = 1.75
+one_shot = true
+
+[node name="LightAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_1353w")
+texture = ExtResource("18_086yg")
+one_shot = true
+
+[node name="SelectSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_x680m")
+volume_db = 1.0

@@ -1,4 +1,5 @@
 extends TileMap
+class_name GameManager
 
 #region SELECTOR VARIABLES
 const selector_atlus_pos: Vector2i = Vector2i(0,0)
@@ -100,7 +101,6 @@ func _input(event):
 	elif event.is_action_pressed("Select") and selected_unit != null \
 	and current_ctrl_mode == control_mode.attacking:
 		
-		current_ctrl_mode = control_mode.locked
 		attack_active_tiles()
 	
 	# CANCEL - DESELECT UNIT
@@ -239,18 +239,66 @@ func move_unit():
 
 # Displays movement tile highlights where the selected unit can move
 func project_movement(range_stat: int, origin: Vector2i):
-	draw_move_tile(origin)
+	var legal_tiles: Array[Vector2i] = []
+	legal_tiles.push_back(origin)
 	var width: int = range_stat
 	var height: int = 0
 	for n in range_stat+1:
 		for i in range(0, width+1):
-			draw_move_tile(origin + Vector2i(i, height))
-			draw_move_tile(origin + Vector2i(-i, height))
+			
+			if coordinate_map.has(origin + Vector2i(i, height)):
+				var temp = get_path_astar(\
+					get_tilenode_from_coord_map(origin), \
+					get_tilenode_from_coord_map(origin + Vector2i(i, height)))
+				
+				if temp != [] and temp.size() <= range_stat+1:
+					legal_tiles.push_back(origin + Vector2i(i, height))
+			
+			if coordinate_map.has(origin + Vector2i(-i, height)):
+				var temp = get_path_astar(\
+					get_tilenode_from_coord_map(origin), \
+					get_tilenode_from_coord_map(origin + Vector2i(-i, height)))
+				
+				if temp != [] and temp.size() <= range_stat+1:
+					legal_tiles.push_back(origin + Vector2i(-i, height))
+			
 			if height != 0:
-				draw_move_tile(origin + Vector2i(i, -height))
-				draw_move_tile(origin + Vector2i(-i, -height))
+				
+				if coordinate_map.has(origin + Vector2i(i, -height)):
+					var temp = get_path_astar(\
+						get_tilenode_from_coord_map(origin), \
+						get_tilenode_from_coord_map(origin + Vector2i(i, -height)))
+				
+					if temp != [] and temp.size() <= range_stat+1:
+						legal_tiles.push_back(origin + Vector2i(i, -height))
+				
+				if coordinate_map.has(origin + Vector2i(-i, -height)):
+					var temp = get_path_astar(\
+						get_tilenode_from_coord_map(origin), \
+						get_tilenode_from_coord_map(origin + Vector2i(-i, -height)))
+				
+					if temp != [] and temp.size() <= range_stat+1:
+						legal_tiles.push_back(origin + Vector2i(-i, -height))
+				
 		height += 1
 		width -= 1
+		
+		# Draw the tiles
+		for tile in legal_tiles:
+			draw_move_tile(tile)
+	
+	#draw_move_tile(origin)
+	#var width: int = range_stat
+	#var height: int = 0
+	#for n in range_stat+1:
+		#for i in range(0, width+1):
+			#draw_move_tile(origin + Vector2i(i, height))
+			#draw_move_tile(origin + Vector2i(-i, height))
+			#if height != 0:
+				#draw_move_tile(origin + Vector2i(i, -height))
+				#draw_move_tile(origin + Vector2i(-i, -height))
+		#height += 1
+		#width -= 1
 
 # Draws a highlighted movement tile at a given tile
 func draw_move_tile(tile: Vector2i):
@@ -303,10 +351,14 @@ func draw_attack_tile(tile: Vector2i):
 		active_attack_tiles.push_back(tile)
 
 # The selected unit attacks all active attack tiles
+# ONLY ATTACK & LOCK CONTROLER IF HITTING SOMETHING
 func attack_active_tiles():
 	var units_to_attack: Array[Unit] = unit_manager.get_units_in_tile_list(active_attack_tiles)
-	for unit in units_to_attack:
-		unit.take_damage(unit_manager.calc_damage(selected_unit, unit))
+	if units_to_attack.size() > 0:
+		current_ctrl_mode = control_mode.locked
+		for unit in units_to_attack:
+			unit.hide_damage_indicator()
+			unit.take_damage(unit_manager.calc_damage(selected_unit, unit), selected_unit.attack_type)
 
 # Creates a series of nodes that help perform pathfinding algorithms
 func init_coord_map():
@@ -317,11 +369,11 @@ func init_coord_map():
 	for n in coord_map_nodes.size():
 		coord_map_nodes[n].init_tile(n, coordinate_map[n])
 
-# Removes null elements from array
-func clean_array(dirty_array: Array[TileNode]) -> Array[TileNode]:
+# Removes null elements from array and elements that contain an obstacle
+func clean_array(dirty_array: Array[TileNode], obstacles: Array[Vector2i]) -> Array[TileNode]:
 	var cleaned_array: Array[TileNode] = []
 	for item in dirty_array:
-		if item != null:
+		if item != null and !obstacles.has(item.tile_pos):
 			cleaned_array.push_back(item)
 	return cleaned_array
 
@@ -350,6 +402,9 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 	var end_node_record: NodeRecord = NodeRecord.new()
 	var end_node_heuristic: float
 	
+	# Get a reference to the position of each "obstacle" on the grid
+	var obstacles: Array[Vector2i] = unit_manager.get_all_unit_positions()
+	
 	# Iterate through processing each node
 	while open.size() > 0:
 		# Find the smallest element in the open list.
@@ -365,7 +420,7 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 			[current.node.tile_left, current.node.tile_right, \
 			current.node.tile_up, current.node.tile_down]
 		# Remove null elements
-		connections = clean_array(connections)
+		connections = clean_array(connections, obstacles)
 		
 		# Loop through each connection
 		for connection in connections:
@@ -407,6 +462,7 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 	# Construct path for return
 	if current.node != goal:
 		print("Search Failed")
+		return []
 	
 	else:
 		while current.node != start:

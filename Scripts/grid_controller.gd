@@ -259,7 +259,7 @@ func move_unit():
 	selected_unit.move_ghost.visible = false
 
 # Displays movement tile highlights where the selected unit can move
-func project_movement(range_stat: int, origin: Vector2i):
+func project_movement(range_stat: int, origin: Vector2i, return_move_set: bool = false):
 	var legal_tiles: Array[Vector2i] = []
 	legal_tiles.push_back(origin)
 	var width: int = range_stat
@@ -304,22 +304,15 @@ func project_movement(range_stat: int, origin: Vector2i):
 		height += 1
 		width -= 1
 		
-		# Draw the tiles
-		for tile in legal_tiles:
-			draw_move_tile(tile)
-	
-	#draw_move_tile(origin)
-	#var width: int = range_stat
-	#var height: int = 0
-	#for n in range_stat+1:
-		#for i in range(0, width+1):
-			#draw_move_tile(origin + Vector2i(i, height))
-			#draw_move_tile(origin + Vector2i(-i, height))
-			#if height != 0:
-				#draw_move_tile(origin + Vector2i(i, -height))
-				#draw_move_tile(origin + Vector2i(-i, -height))
-		#height += 1
-		#width -= 1
+		# Enemy unit case (Used only for enemies)
+		if return_move_set:
+			return legal_tiles
+		
+		# Player unit case
+		else:
+			# Draw the tiles
+			for tile in legal_tiles:
+				draw_move_tile(tile)
 
 # Draws a highlighted movement tile at a given tile
 func draw_move_tile(tile: Vector2i):

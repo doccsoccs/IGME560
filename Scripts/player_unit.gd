@@ -163,7 +163,7 @@ func take_damage(damage: int, damage_type: typing):
 # Project an attack
 func show_attack():
 	manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
-	manager.grid.attack_patterns = get_attack_patterns(attack_path)
+	manager.grid.attack_patterns = get_attack_patterns()
 	manager.grid.project_attack(current_facing_state)
 
 # Ends the unit's "turn"
@@ -208,8 +208,8 @@ func hide_damage_indicator():
 
 # Returns an array of tile positions representing an attack pattern 
 # facing down and centered at (0,0) 
-func get_attack_patterns(path: String) -> Array[Array]:
-	var file = FileAccess.open(path, FileAccess.READ)
+func get_attack_patterns() -> Array[Array]:
+	var file = FileAccess.open(attack_path, FileAccess.READ)
 	var text = file.get_as_text()
 	var s: Array[String] = []
 	s.assign(text.split("|"))
@@ -265,7 +265,6 @@ func get_attack_patterns(path: String) -> Array[Array]:
 		temp.push_back(Vector2i(origin.y - y_diff, origin.x - x_diff))
 	omni_dir_patterns.push_back(temp)
 	temp = []
-	omni_dir_patterns.push_back(temp)
 	
 	# Down = 0
 	# Up = 1

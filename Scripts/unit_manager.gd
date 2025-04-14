@@ -114,8 +114,12 @@ func handle_end_turn(player_turn: bool):
 		for unit in player_units:
 			if unit.current_game_state != unit.game_state.expended:
 				return
+		
 		# If all units are expended, switch turns
 		grid.toggle_turn()
+		
+		# Start enemy unit turns
+		next_enemy_move()
 	
 	# Checks during enemy turn
 	else:
@@ -123,3 +127,110 @@ func handle_end_turn(player_turn: bool):
 			if unit.current_game_state != unit.game_state.expended:
 				return
 		grid.toggle_turn()
+
+# Initiates the next enemy move during the enemy turn
+func next_enemy_move():
+	for enemy in enemy_units:
+		if enemy.current_game_state != enemy.game_state.expended:
+			# Retrieves a dictionary of potential movements the enemy can take
+			# Contains the details for attacking in a given direction 
+			var move_dictionary = create_move_dictionary(enemy)
+			
+			# Determine the best position to move and attack to based on this dictionary
+			var best_move = get_best_move(move_dictionary)
+
+# Returns a dictionary containing a set of tiles a given unit can reach
+# tile keys link to an int array containing data used to make optimal decisions.
+# Called at the start of each enemy's turn.
+# PARAM: Active Enemy Unit
+# OUTPUT: Dictionary[Tile -> Dictionary[ORIENTATION -> Array]] 
+# Array of [# Players Hit, # Players Killed, # Enemies Hit, # Enemies Killed, Damage]
+func create_move_dictionary(current_enemy: Unit) -> Dictionary:
+	var move_dictionary: Dictionary = {}
+	
+	# Retrieves the set of all tiles the unit can move to
+	var movement_set: Array[Vector2i] = \
+		grid.project_movement(current_enemy.range_stat, current_enemy.current_tile, true)
+	
+	# Cycle through the movement set and assign dictionary values
+	for tile in movement_set:
+		
+		# Retrieve an array of tile positions indicating 
+		# where the unit can attack given each of 4 directions
+		# Down = 0, Up = 1, Left = 2, Right = 3
+		var temp_dictionary: Dictionary
+		var attack_set: Array[Array] = current_enemy.get_attack_patterns()
+		var attack_direction: int = 0
+		
+		# Create a new sub dictionary per attack set
+		for attack_tiles in attack_set:
+			
+			# Determine the following for each attack set:
+			# - # Players Hit
+			# - # Players Killed
+			# - # Enemies Hit
+			# - # Enemies Killed
+			# - Total Advantageous Damage
+			var data: Array[int] = []
+			
+			# Retrieve all units in tile list
+			var units_hit: Array[Unit] = get_units_in_tile_list(attack_tiles)
+			var players_hit: int = 0
+			var players_killed: int = 0
+			var enemies_hit: int = 0
+			var enemies_killed: int = 0
+			var total_damage: int = 0
+			
+			# Get the # of players hit
+			for unit in units_hit:
+				# Get the potential damage without variance
+				var damage: int = calc_damage_for_display(current_enemy, unit)
+				
+				# Player Case
+				if unit.is_player:
+					players_hit += 1
+					total_damage += damage
+					if unit.hp - damage <= 0:
+						players_killed += 1
+				
+				# Enemy Case; SUBTRACT damage dealt since is non-advantageous
+				else:
+					enemies_hit += 1
+					total_damage -= damage
+					if unit.hp - damage <= 0:
+						enemies_killed += 1
+			
+			# Construct value for key
+			data.push_back(players_hit)
+			data.push_back(players_killed)
+			data.push_back(enemies_hit)
+			data.push_back(enemies_killed)
+			data.push_back(total_damage)
+			
+			# Assign Key to Value
+			temp_dictionary[attack_direction] = data
+			move_dictionary[tile] = temp_dictionary
+			
+			# Increment the attack direction counter
+			attack_direction += 1
+	
+	return move_dictionary
+
+# Returns a list containing the following:
+# 1) optimal position for the enemy to move to
+# 2) optimal direction for the enemy to attack / SET TO -1 to WAIT !!!
+func get_best_move(move_dict: Dictionary) -> Array:
+	
+	# Evaluate the best possible move
+	# Loop through each position, and each attack direction therein
+	for tile in move_dict.values():
+		for direction in 4:
+			# Gets the Array[int] of data from the layered Dictionary
+			var test = tile[direction]
+			pass
+	
+	return []
+
+# Selects a random move to execute
+func get_random_move(move_dict: Dictionary):
+	return

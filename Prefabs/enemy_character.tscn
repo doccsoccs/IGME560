@@ -1,8 +1,7 @@
-[gd_scene load_steps=66 format=3 uid="uid://cro3xt3nilril"]
+[gd_scene load_steps=65 format=3 uid="uid://cro3xt3nilril"]
 
 [ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_eeu8b"]
 [ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_8axic"]
-[ext_resource type="Script" path="res://Scripts/ENEMY_AI.gd" id="3_k0ypu"]
 [ext_resource type="Texture2D" uid="uid://dt76maulpwdd7" path="res://Sprites/Characters/enemy/enemy_idle.png" id="4_pfkbs"]
 [ext_resource type="Texture2D" uid="uid://bv4ln1swcpwpe" path="res://Sprites/Characters/enemy/enemy_idle_faceback.png" id="5_6hnwa"]
 [ext_resource type="Texture2D" uid="uid://3kqk2gwip387" path="res://Sprites/Characters/enemy/enemy_walk.png" id="6_abpbp"]
@@ -420,9 +419,6 @@ offset = Vector2(0, -12)
 hframes = 12
 script = ExtResource("2_8axic")
 is_player = false
-
-[node name="ENEMY_AI" type="Node" parent="."]
-script = ExtResource("3_k0ypu")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {

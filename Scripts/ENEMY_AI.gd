@@ -1,6 +1,8 @@
 extends Node
 class_name EnemyUnit
 
+var move_dictionary: Dictionary
+
 # Create commands/actions/queries for the following:
 # - Determine a unit's attack range (UNIT MANAGER)
 # - Is a player unit in attack range? (ENEMY AI)

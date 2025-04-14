@@ -1,31 +1,33 @@
-[gd_scene load_steps=64 format=3 uid="uid://beifeixysoyl6"]
+[gd_scene load_steps=66 format=3 uid="uid://cro3xt3nilril"]
 
-[ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_xnvij"]
-[ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_vccjh"]
-[ext_resource type="Texture2D" uid="uid://chtice56oc5ck" path="res://Sprites/Characters/clockwing_walk.png" id="3_xa0mg"]
-[ext_resource type="Texture2D" uid="uid://de7wauh0j6pb2" path="res://Sprites/Characters/clockwing_walk_faceback.png" id="4_2l1w2"]
-[ext_resource type="PackedScene" uid="uid://cm28u8g72cdbd" path="res://Prefabs/UI/select_key_indicator.tscn" id="5_b1ky1"]
-[ext_resource type="Texture2D" uid="uid://xdp6dhkybrou" path="res://Sprites/Characters/clockwing_idle_faceback.png" id="5_okv2c"]
-[ext_resource type="Texture2D" uid="uid://bfgbx1g670wua" path="res://Sprites/UI/damage_overhead.png" id="6_87qyq"]
-[ext_resource type="PackedScene" uid="uid://ckstdvx1288y8" path="res://Prefabs/Unit Ghosts/default_character_ghost.tscn" id="6_fnvkf"]
-[ext_resource type="FontFile" uid="uid://dp5c3byjts7yw" path="res://Sprites/UI/dogica/OTF/dogica.otf" id="7_64uyg"]
-[ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="7_x680m"]
-[ext_resource type="FontFile" uid="uid://c4aoq70jhlfo" path="res://Sprites/UI/dogica/TTF/dogica.ttf" id="8_0vq2s"]
-[ext_resource type="PackedScene" uid="uid://vofy6gq6oex7" path="res://Prefabs/UI/action_buttons.tscn" id="8_fr38c"]
-[ext_resource type="Script" path="res://Scripts/particle_manager.gd" id="13_er3pj"]
-[ext_resource type="Texture2D" uid="uid://bb02s0y20ll1" path="res://Sprites/UI/typeindicators.png" id="13_fbdjb"]
-[ext_resource type="Script" path="res://Scripts/crit_ui.gd" id="13_fnri8"]
-[ext_resource type="Texture2D" uid="uid://d0bp8bl0nsupj" path="res://Sprites/Attack Particles/waterbubble.png" id="14_lgl43"]
-[ext_resource type="Texture2D" uid="uid://bly517w00tmda" path="res://Sprites/Attack Particles/rock.png" id="15_0qm0j"]
-[ext_resource type="Texture2D" uid="uid://c7dwjvnbvgoks" path="res://Sprites/Attack Particles/ember.png" id="15_i8f2u"]
-[ext_resource type="Texture2D" uid="uid://bkqfrwbmmk0a3" path="res://Sprites/Attack Particles/airstream.png" id="17_ssoto"]
-[ext_resource type="Texture2D" uid="uid://bl12v4a7frewu" path="res://Sprites/Attack Particles/light.png" id="18_086yg"]
-[ext_resource type="AudioStream" uid="uid://c65kbxxdvxw2v" path="res://SFX/Attack SFX/water.wav" id="20_6opg5"]
-[ext_resource type="AudioStream" uid="uid://bidobmbwcv8mg" path="res://SFX/Attack SFX/earth.mp3" id="21_86g00"]
-[ext_resource type="AudioStream" uid="uid://ri02s6gh3raf" path="res://SFX/Attack SFX/fire.mp3" id="22_dnpx7"]
-[ext_resource type="AudioStream" uid="uid://c3310p3hoo3uh" path="res://SFX/Attack SFX/air.wav" id="23_6jybb"]
-[ext_resource type="AudioStream" uid="uid://x3kl728ir8ly" path="res://SFX/Attack SFX/shadow.mp3" id="24_thpnn"]
-[ext_resource type="AudioStream" uid="uid://ctj004ws56irt" path="res://SFX/Attack SFX/light.mp3" id="25_4qw5j"]
+[ext_resource type="Texture2D" uid="uid://celdskpsgjihq" path="res://Sprites/Characters/clockwing_idle.png" id="1_eeu8b"]
+[ext_resource type="Script" path="res://Scripts/player_unit.gd" id="2_8axic"]
+[ext_resource type="Script" path="res://Scripts/ENEMY_AI.gd" id="3_k0ypu"]
+[ext_resource type="Texture2D" uid="uid://dt76maulpwdd7" path="res://Sprites/Characters/enemy/enemy_idle.png" id="4_pfkbs"]
+[ext_resource type="Texture2D" uid="uid://bv4ln1swcpwpe" path="res://Sprites/Characters/enemy/enemy_idle_faceback.png" id="5_6hnwa"]
+[ext_resource type="Texture2D" uid="uid://3kqk2gwip387" path="res://Sprites/Characters/enemy/enemy_walk.png" id="6_abpbp"]
+[ext_resource type="Texture2D" uid="uid://bfgbx1g670wua" path="res://Sprites/UI/damage_overhead.png" id="6_b00vw"]
+[ext_resource type="FontFile" uid="uid://dp5c3byjts7yw" path="res://Sprites/UI/dogica/OTF/dogica.otf" id="7_guvwx"]
+[ext_resource type="Texture2D" uid="uid://gw6x4mf66i3t" path="res://Sprites/Characters/enemy/enemy_walk_faceback.png" id="7_vkhhr"]
+[ext_resource type="FontFile" uid="uid://c4aoq70jhlfo" path="res://Sprites/UI/dogica/TTF/dogica.ttf" id="8_5x0ks"]
+[ext_resource type="PackedScene" uid="uid://cm28u8g72cdbd" path="res://Prefabs/UI/select_key_indicator.tscn" id="9_8vp3w"]
+[ext_resource type="PackedScene" uid="uid://ckstdvx1288y8" path="res://Prefabs/Unit Ghosts/default_character_ghost.tscn" id="10_tb7sl"]
+[ext_resource type="PackedScene" uid="uid://vofy6gq6oex7" path="res://Prefabs/UI/action_buttons.tscn" id="11_tysw0"]
+[ext_resource type="Texture2D" uid="uid://bb02s0y20ll1" path="res://Sprites/UI/typeindicators.png" id="12_rs64i"]
+[ext_resource type="Script" path="res://Scripts/crit_ui.gd" id="13_8if30"]
+[ext_resource type="Script" path="res://Scripts/particle_manager.gd" id="14_p2gpn"]
+[ext_resource type="Texture2D" uid="uid://d0bp8bl0nsupj" path="res://Sprites/Attack Particles/waterbubble.png" id="15_mny6f"]
+[ext_resource type="Texture2D" uid="uid://bly517w00tmda" path="res://Sprites/Attack Particles/rock.png" id="16_bcoqn"]
+[ext_resource type="Texture2D" uid="uid://c7dwjvnbvgoks" path="res://Sprites/Attack Particles/ember.png" id="17_bjww4"]
+[ext_resource type="Texture2D" uid="uid://bkqfrwbmmk0a3" path="res://Sprites/Attack Particles/airstream.png" id="18_pjb7g"]
+[ext_resource type="Texture2D" uid="uid://bl12v4a7frewu" path="res://Sprites/Attack Particles/light.png" id="19_uro51"]
+[ext_resource type="AudioStream" uid="uid://cto7yssg2ttx5" path="res://SFX/unit_select.mp3" id="20_vj76w"]
+[ext_resource type="AudioStream" uid="uid://c65kbxxdvxw2v" path="res://SFX/Attack SFX/water.wav" id="21_qkis5"]
+[ext_resource type="AudioStream" uid="uid://bidobmbwcv8mg" path="res://SFX/Attack SFX/earth.mp3" id="22_iyalm"]
+[ext_resource type="AudioStream" uid="uid://ri02s6gh3raf" path="res://SFX/Attack SFX/fire.mp3" id="23_u2jap"]
+[ext_resource type="AudioStream" uid="uid://c3310p3hoo3uh" path="res://SFX/Attack SFX/air.wav" id="24_cuaot"]
+[ext_resource type="AudioStream" uid="uid://x3kl728ir8ly" path="res://SFX/Attack SFX/shadow.mp3" id="25_5btwl"]
+[ext_resource type="AudioStream" uid="uid://ctj004ws56irt" path="res://SFX/Attack SFX/light.mp3" id="26_67ear"]
 
 [sub_resource type="Animation" id="Animation_6y2sy"]
 length = 0.001
@@ -39,7 +41,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("1_xnvij")]
+"values": [ExtResource("1_eeu8b")]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -80,7 +82,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("1_xnvij")]
+"values": [ExtResource("4_pfkbs")]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -121,7 +123,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("5_okv2c")]
+"values": [ExtResource("5_6hnwa")]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -161,7 +163,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("3_xa0mg")]
+"values": [ExtResource("6_abpbp")]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -201,7 +203,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("4_2l1w2")]
+"values": [ExtResource("7_vkhhr")]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -238,7 +240,7 @@ _data = {
 }
 
 [sub_resource type="LabelSettings" id="LabelSettings_1fdbt"]
-font = ExtResource("8_0vq2s")
+font = ExtResource("8_5x0ks")
 font_size = 8
 font_color = Color(1, 0.956863, 0.678431, 1)
 outline_color = Color(0, 0, 0, 1)
@@ -247,7 +249,7 @@ shadow_color = Color(0, 0, 0, 0.427451)
 shadow_offset = Vector2(0.5, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_qexd2"]
-font = ExtResource("8_0vq2s")
+font = ExtResource("8_5x0ks")
 font_size = 8
 font_color = Color(0.984314, 0.721569, 0.635294, 1)
 shadow_color = Color(0, 0, 0, 0.360784)
@@ -255,8 +257,8 @@ shadow_color = Color(0, 0, 0, 0.360784)
 [sub_resource type="LabelSettings" id="LabelSettings_6dt27"]
 font_size = 8
 outline_size = 1
-outline_color = Color(0, 0.172549, 1, 1)
-shadow_color = Color(0, 0, 0.411765, 0.913725)
+outline_color = Color(1, 0, 0, 1)
+shadow_color = Color(0.305882, 0, 0, 0.933333)
 
 [sub_resource type="LabelSettings" id="LabelSettings_mmd78"]
 font_size = 8
@@ -411,12 +413,16 @@ scale_max = 0.75
 scale_curve = SubResource("CurveTexture_isw7b")
 alpha_curve = SubResource("CurveTexture_30u76")
 
-[node name="DefaultCharacter" type="Sprite2D"]
+[node name="EnemyCharacter" type="Sprite2D"]
 z_index = 3
-texture = ExtResource("1_xnvij")
+texture = ExtResource("1_eeu8b")
 offset = Vector2(0, -12)
 hframes = 12
-script = ExtResource("2_vccjh")
+script = ExtResource("2_8axic")
+is_player = false
+
+[node name="ENEMY_AI" type="Node" parent="."]
+script = ExtResource("3_k0ypu")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -427,7 +433,7 @@ libraries = {
 visible = false
 position = Vector2(0, -36)
 scale = Vector2(0.75, 0.75)
-texture = ExtResource("6_87qyq")
+texture = ExtResource("6_b00vw")
 hframes = 3
 
 [node name="DamageLabel" type="Label" parent="DamageOverhead"]
@@ -444,7 +450,7 @@ offset_bottom = -15.9893
 grow_horizontal = 2
 size_flags_horizontal = 6
 size_flags_vertical = 8
-theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_fonts/font = ExtResource("7_guvwx")
 theme_override_font_sizes/font_size = 8
 text = "999"
 label_settings = SubResource("LabelSettings_1fdbt")
@@ -467,7 +473,7 @@ grow_horizontal = 2
 scale = Vector2(0.7, 0.7)
 size_flags_horizontal = 6
 size_flags_vertical = 8
-theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_fonts/font = ExtResource("7_guvwx")
 theme_override_font_sizes/font_size = 8
 text = "100%"
 label_settings = SubResource("LabelSettings_qexd2")
@@ -476,13 +482,13 @@ vertical_alignment = 1
 text_direction = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="SelectKeyIndicator" parent="." instance=ExtResource("5_b1ky1")]
+[node name="SelectKeyIndicator" parent="." instance=ExtResource("9_8vp3w")]
 visible = false
 
-[node name="MovementGhost" parent="." instance=ExtResource("6_fnvkf")]
+[node name="MovementGhost" parent="." instance=ExtResource("10_tb7sl")]
 visible = false
 
-[node name="ActionButtons" parent="." instance=ExtResource("8_fr38c")]
+[node name="ActionButtons" parent="." instance=ExtResource("11_tysw0")]
 visible = false
 z_index = 1
 position = Vector2(26, -23)
@@ -493,7 +499,7 @@ z_index = 9
 [node name="TypeIndicator" type="Sprite2D" parent="HealthBar"]
 position = Vector2(5.5, 2)
 scale = Vector2(0.5, 0.5)
-texture = ExtResource("13_fbdjb")
+texture = ExtResource("12_rs64i")
 hframes = 6
 
 [node name="HealthLabel" type="Label" parent="HealthBar"]
@@ -511,7 +517,7 @@ grow_horizontal = 2
 scale = Vector2(0.75, 0.75)
 size_flags_horizontal = 6
 size_flags_vertical = 8
-theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_fonts/font = ExtResource("7_guvwx")
 theme_override_font_sizes/font_size = 8
 text = "99
 "
@@ -522,7 +528,7 @@ text_direction = 1
 
 [node name="CritIndicator" type="Node2D" parent="."]
 visible = false
-script = ExtResource("13_fnri8")
+script = ExtResource("13_8if30")
 
 [node name="HealthLabel2" type="Label" parent="CritIndicator"]
 y_sort_enabled = true
@@ -539,7 +545,7 @@ grow_horizontal = 2
 scale = Vector2(0.75, 0.75)
 size_flags_horizontal = 6
 size_flags_vertical = 8
-theme_override_fonts/font = ExtResource("7_64uyg")
+theme_override_fonts/font = ExtResource("7_guvwx")
 theme_override_font_sizes/font_size = 8
 text = "CRIT"
 label_settings = SubResource("LabelSettings_mmd78")
@@ -548,12 +554,12 @@ vertical_alignment = 1
 text_direction = 1
 
 [node name="ParticleManager" type="Node2D" parent="."]
-script = ExtResource("13_er3pj")
+script = ExtResource("14_p2gpn")
 
 [node name="WaterAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_xyfvi")
-texture = ExtResource("14_lgl43")
+texture = ExtResource("15_mny6f")
 lifetime = 0.8
 one_shot = true
 speed_scale = 1.2
@@ -563,7 +569,7 @@ trail_sections = 4
 emitting = false
 amount = 1
 process_material = SubResource("ParticleProcessMaterial_0qaov")
-texture = ExtResource("15_0qm0j")
+texture = ExtResource("16_bcoqn")
 lifetime = 0.8
 one_shot = true
 explosiveness = 1.0
@@ -571,7 +577,7 @@ explosiveness = 1.0
 [node name="EarthFollowupParticles" type="GPUParticles2D" parent="ParticleManager/EarthAttackParticles"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_gyh0b")
-texture = ExtResource("15_0qm0j")
+texture = ExtResource("16_bcoqn")
 lifetime = 0.7
 one_shot = true
 explosiveness = 0.9
@@ -579,7 +585,7 @@ explosiveness = 0.9
 [node name="FireAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_ac5l6")
-texture = ExtResource("15_i8f2u")
+texture = ExtResource("17_bjww4")
 lifetime = 0.8
 one_shot = true
 explosiveness = 0.8
@@ -587,48 +593,48 @@ explosiveness = 0.8
 [node name="AirAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_j7fwx")
-texture = ExtResource("17_ssoto")
+texture = ExtResource("18_pjb7g")
 one_shot = true
 
 [node name="ShadowAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_q8jwm")
-texture = ExtResource("17_ssoto")
+texture = ExtResource("18_pjb7g")
 lifetime = 1.5
 one_shot = true
 
 [node name="LightAttackParticles" type="GPUParticles2D" parent="ParticleManager"]
 emitting = false
 process_material = SubResource("ParticleProcessMaterial_1353w")
-texture = ExtResource("18_086yg")
+texture = ExtResource("19_uro51")
 one_shot = true
 
 [node name="SelectSFX" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("7_x680m")
+stream = ExtResource("20_vj76w")
 volume_db = 1.0
 
 [node name="AttackSFX" type="Node" parent="."]
 
 [node name="WaterSFX" type="AudioStreamPlayer" parent="AttackSFX"]
-stream = ExtResource("20_6opg5")
+stream = ExtResource("21_qkis5")
 volume_db = -3.0
 
 [node name="EarthSFX" type="AudioStreamPlayer" parent="AttackSFX"]
-stream = ExtResource("21_86g00")
+stream = ExtResource("22_iyalm")
 volume_db = -3.0
 
 [node name="FireSFX" type="AudioStreamPlayer" parent="AttackSFX"]
-stream = ExtResource("22_dnpx7")
+stream = ExtResource("23_u2jap")
 volume_db = -3.0
 
 [node name="AirSFX" type="AudioStreamPlayer" parent="AttackSFX"]
-stream = ExtResource("23_6jybb")
+stream = ExtResource("24_cuaot")
 volume_db = -3.0
 
 [node name="ShadowSFX" type="AudioStreamPlayer" parent="AttackSFX"]
-stream = ExtResource("24_thpnn")
+stream = ExtResource("25_5btwl")
 volume_db = -6.0
 
 [node name="LightSFX" type="AudioStreamPlayer" parent="AttackSFX"]
-stream = ExtResource("25_4qw5j")
+stream = ExtResource("26_67ear")
 volume_db = -5.0

@@ -11,30 +11,45 @@ extends Node2D
 # Follow-ups for multi-part particles
 @onready var earth_followup_particles = $EarthAttackParticles/EarthFollowupParticles
 
+# SFX
+@onready var water_sfx = $"../AttackSFX/WaterSFX"
+@onready var earth_sfx = $"../AttackSFX/EarthSFX"
+@onready var fire_sfx = $"../AttackSFX/FireSFX"
+@onready var air_sfx = $"../AttackSFX/AirSFX"
+@onready var shadow_sfx = $"../AttackSFX/ShadowSFX"
+@onready var light_sfx = $"../AttackSFX/LightSFX"
+
+
 func emit_water():
 	water_particles.emitting = true
+	water_sfx.play()
 	await get_tree().create_timer(water_particles.lifetime).timeout
 
 func emit_earth():
 	earth_particles.emitting = true
 	await get_tree().create_timer(water_particles.lifetime).timeout
 	earth_followup_particles.emitting = true
+	earth_sfx.play()
 	await get_tree().create_timer(earth_followup_particles.lifetime).timeout
 
 func emit_fire():
 	fire_particles.emitting = true
+	fire_sfx.play()
 	await get_tree().create_timer(fire_particles.lifetime).timeout
 
 func emit_air():
 	air_particles.emitting = true
+	air_sfx.play()
 	await get_tree().create_timer(air_particles.lifetime).timeout
 
 func emit_shadow():
 	shadow_particles.emitting = true
+	shadow_sfx.play()
 	await get_tree().create_timer(shadow_particles.lifetime).timeout
 
 func emit_light():
 	light_particles.emitting = true
+	light_sfx.play()
 	await get_tree().create_timer(light_particles.lifetime).timeout
 
 # Calls a function to emit a certain particle type

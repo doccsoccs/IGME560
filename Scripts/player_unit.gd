@@ -4,7 +4,8 @@ class_name Unit
 # PLAYER Z-INDECES
 # Level 0 = 2, Level 1 = 5, Level 2 = 8
 
-const is_player: bool = true
+@export_category("UNIT")
+@export var is_player: bool = true
 
 #region UNIT STATISTICS
 @export_category("STATS")
@@ -90,6 +91,7 @@ const initial_anim: anim_state = anim_state.idle
 @onready var type_indicator = $HealthBar/TypeIndicator
 @onready var manager = $".."
 @onready var particle_manager = $ParticleManager
+@onready var crit_indicator = $CritIndicator
 
 ## SFX
 @onready var select_sfx = $SelectSFX
@@ -147,7 +149,7 @@ func _process(delta):
 # Initializes the unit to be used during a round of play
 func init_for_new_round():
 	current_game_state = game_state.waiting
-	modulate = Color.WHITE
+	self_modulate = Color.WHITE
 
 # Called when this unit takes damage from an attack
 func take_damage(damage: int, damage_type: typing):
@@ -168,7 +170,8 @@ func show_attack():
 func end_turn():
 	manager.grid.handle_end_turn()
 	current_game_state = game_state.expended
-	modulate = Color.DARK_GRAY
+	self_modulate = Color.DARK_GRAY
+	manager.handle_end_turn(is_player)
 
 # Moves the unit immediately to a particular tile
 func move_to(target: Vector2i):
@@ -180,9 +183,23 @@ func ghost_move_tile(new_tile: Vector2i):
 	move_ghost.global_position = map_to_loc(new_tile)
 
 # Show the damage indicator for some attack
-func show_damage_indicator():
+func show_damage_indicator(attacking_unit: Unit):
 	damage_label.text = str(manager.calc_damage_for_display(manager.grid.selected_unit, self))
 	damage_overhead.visible = true
+	
+	# Change label frame depending on type matchup
+	match manager.type_matchup(attacking_unit, self):
+		1.0:
+			damage_overhead.frame = 0
+			return
+		2.0:
+			damage_overhead.frame = 1
+			return
+		0.5:
+			damage_overhead.frame = 2
+			return
+		_:
+			damage_overhead.frame = 0
 
 # Hide the damage indicator after an attack is declared 
 # or when the projected attack stops hovering on unit

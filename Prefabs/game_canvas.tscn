@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://j6vjnimften5"]
+
+[ext_resource type="Script" path="res://Scripts/game_canvas.gd" id="1_buvk6"]
+[ext_resource type="Texture2D" uid="uid://cqti5ethift2v" path="res://Sprites/UI/turn_display.png" id="1_rcujp"]
+
+[node name="GameCanvas" type="CanvasLayer"]
+script = ExtResource("1_buvk6")
+
+[node name="TurnDisplay" type="Sprite2D" parent="."]
+position = Vector2(131, 36)
+scale = Vector2(2, 2)
+texture = ExtResource("1_rcujp")
+hframes = 2

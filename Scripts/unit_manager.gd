@@ -18,6 +18,8 @@ func _ready():
 			units.push_back(unit)
 			if unit.is_player:
 				player_units.push_back(unit)
+			else:
+				enemy_units.push_back(unit)
 
 # Returns an array containing all positions of active units
 func get_all_unit_positions() -> Array[Vector2i]:
@@ -36,12 +38,12 @@ func get_unit_at_tile(tile: Vector2i) -> Unit:
 
 # Returns an array of units that are detected within a set of tiles
 func get_units_in_tile_list(tiles: Array[Vector2i]) -> Array[Unit]:
-	var attacked_units: Array[Unit] = []
+	var detected_units: Array[Unit] = []
 	for tile in tiles:
 		var temp: Unit = get_unit_at_tile(tile)
 		if temp != null:
-			attacked_units.push_back(temp)
-	return attacked_units
+			detected_units.push_back(temp)
+	return detected_units
 
 # Returns a multiplier based on type matchup
 # Neutral = 1.0, Ineffective = 0.5, Effective = 2.0
@@ -89,11 +91,13 @@ func calc_damage_for_display(attacker: Unit, defender: Unit) -> int:
 			* type_matchup(attacker, defender)
 	return int(f)
 
-func calc_damage(attacker: Unit, defender: Unit):
+# Actual damage calculation
+func calc_damage(attacker: Unit, defender: Unit) -> int:
 	# Crit change = (attacker.skill/2) / 100
 	var crit: float = 1.0
 	if randf_range(0,100) < float(attacker.skill)/2:
 		crit = 1.5
+		defender.crit_indicator.display_crit()
 	
 	# Damage = ({[base power * (attack/defense)]/50} + 2) * (TYPE) * (RANDOM) * (CRIT)
 	var f: float = ((float(attacker.attack_base_power) \
@@ -102,3 +106,20 @@ func calc_damage(attacker: Unit, defender: Unit):
 			* randf_range(0.9, 1.1) \
 			* crit
 	return int(f)
+
+# Checks to see if all units on a side have expended their turn
+# Switch turns if they are all expended
+func handle_end_turn(player_turn: bool):
+	if player_turn:
+		for unit in player_units:
+			if unit.current_game_state != unit.game_state.expended:
+				return
+		# If all units are expended, switch turns
+		grid.toggle_turn()
+	
+	# Checks during enemy turn
+	else:
+		for unit in enemy_units:
+			if unit.current_game_state != unit.game_state.expended:
+				return
+		grid.toggle_turn()

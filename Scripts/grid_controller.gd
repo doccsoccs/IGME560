@@ -1,6 +1,9 @@
 extends TileMap
 class_name GameManager
 
+# Turn Controls
+var is_player_turn: bool = true
+
 #region SELECTOR VARIABLES
 const selector_atlus_pos: Vector2i = Vector2i(0,0)
 const selector_source: int = 3
@@ -58,6 +61,7 @@ var current_ctrl_mode: control_mode
 @onready var move_selector_sfx = $MoveSelectorSFX
 
 # References
+@onready var game_canvas = $"../GameCanvas"
 var unit_manager
 
 # Onload
@@ -176,6 +180,23 @@ func _input(event):
 			selected_unit.set_facing(selected_unit.facing_state.right)
 			delete_attack_tiles()
 			project_attack(current_attack_dir)
+	
+	# DEBUG CONTROLS
+	if event.is_action_pressed("TOGGLETURN"):
+		toggle_turn()
+
+# Switches which side's turn it is
+func toggle_turn():
+	is_player_turn = !is_player_turn
+	game_canvas.update_turn_indicator(is_player_turn)
+	
+	# Lock player controls if is enemy turn, free if is player turn
+	if !is_player_turn:
+		current_ctrl_mode = control_mode.locked
+		hide_selector()
+	else:
+		current_ctrl_mode = control_mode.free
+		move_selector(unit_manager.player_units[0].current_tile)
 
 # Moves the selector to a new position and deletes the old tile
 func move_selector(new_pos: Vector2i):
@@ -336,7 +357,7 @@ func project_attack(index: int):
 	for tile in active_attack_tiles:
 		var unit = unit_manager.get_unit_at_tile(tile)
 		if unit != null:
-			unit.show_damage_indicator()
+			unit.show_damage_indicator(selected_unit)
 
 # Erases attack highlight tiles and clears the attack tile list
 func delete_attack_tiles():
@@ -359,6 +380,11 @@ func attack_active_tiles():
 		for unit in units_to_attack:
 			unit.hide_damage_indicator()
 			unit.take_damage(unit_manager.calc_damage(selected_unit, unit), selected_unit.attack_type)
+	
+	# Await damage particles and hp anim to finish
+	# then clear attack highlights and end turn
+	delete_attack_tiles()
+	selected_unit.end_turn()
 
 # Creates a series of nodes that help perform pathfinding algorithms
 func init_coord_map():

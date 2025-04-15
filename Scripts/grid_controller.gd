@@ -303,16 +303,16 @@ func project_movement(range_stat: int, origin: Vector2i, return_move_set: bool =
 				
 		height += 1
 		width -= 1
-		
-		# Enemy unit case (Used only for enemies)
-		if return_move_set:
-			return legal_tiles
-		
-		# Player unit case
-		else:
-			# Draw the tiles
-			for tile in legal_tiles:
-				draw_move_tile(tile)
+	
+	# Enemy unit case (Used only for enemies)
+	if return_move_set:
+		return legal_tiles
+	
+	# Player unit case
+	else:
+		# Draw the tiles
+		for tile in legal_tiles:
+			draw_move_tile(tile)
 
 # Draws a highlighted movement tile at a given tile
 func draw_move_tile(tile: Vector2i):
@@ -337,20 +337,23 @@ func delete_move_tiles():
 	active_move_tiles.clear()
 
 # Displays movement tile highlights where the selected unit can move
-func project_attack(index: int):
+func project_attack(index: int, unit_override: Unit = null):
 	# Hide all damage indicators to start
 	for unit in unit_manager.units:
 		unit.hide_damage_indicator()
 	
 	# Draw tiles
 	for tile in attack_patterns[index]:
-		draw_attack_tile(tile + selected_unit.current_tile)
+		#draw_attack_tile(tile + selected_unit.current_tile)
+		draw_attack_tile(tile)
 	
 	# Check tiles for units within the attack range_stat
 	for tile in active_attack_tiles:
 		var unit = unit_manager.get_unit_at_tile(tile)
-		if unit != null:
+		if unit != null and unit_override == null: # Player Case
 			unit.show_damage_indicator(selected_unit)
+		elif unit != null and unit_override != null: # Enemy Case
+			unit.show_damage_indicator(unit_override)
 
 # Erases attack highlight tiles and clears the attack tile list
 func delete_attack_tiles():

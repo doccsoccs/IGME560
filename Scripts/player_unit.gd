@@ -6,6 +6,7 @@ class_name Unit
 
 @export_category("UNIT")
 @export var is_player: bool = true
+var enemy_attack_dir: int = -1
 
 #region UNIT STATISTICS
 @export_category("STATS")
@@ -144,7 +145,12 @@ func _process(delta):
 		if move_path.size() == 1:
 			prev_tile = current_tile
 			current_tile = move_path[0]
-			set_game_state(game_state.select_action)
+			
+			# Only transition to action select state if is a player
+			if is_player:
+				set_game_state(game_state.select_action)
+			else:
+				show_attack()
 
 # Initializes the unit to be used during a round of play
 func init_for_new_round():
@@ -162,9 +168,14 @@ func take_damage(damage: int, damage_type: typing):
 # Inform manager to change control mode to ATTACKING
 # Project an attack
 func show_attack():
-	manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
 	manager.grid.attack_patterns = get_attack_patterns()
-	manager.grid.project_attack(current_facing_state)
+	
+	if is_player: # Player Case
+		manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
+		manager.grid.project_attack(current_facing_state)
+	else: # Enemy Case
+		set_facing(enemy_attack_dir)
+		manager.grid.project_attack(current_facing_state, self)
 
 # Ends the unit's "turn"
 func end_turn():
@@ -184,7 +195,7 @@ func ghost_move_tile(new_tile: Vector2i):
 
 # Show the damage indicator for some attack
 func show_damage_indicator(attacking_unit: Unit):
-	damage_label.text = str(manager.calc_damage_for_display(manager.grid.selected_unit, self))
+	damage_label.text = str(manager.calc_damage_for_display(attacking_unit, self))
 	damage_overhead.visible = true
 	
 	# Change label frame depending on type matchup
@@ -208,7 +219,7 @@ func hide_damage_indicator():
 
 # Returns an array of tile positions representing an attack pattern 
 # facing down and centered at (0,0) 
-func get_attack_patterns() -> Array[Array]:
+func get_attack_patterns(use_override: bool = false, override_tile: Vector2i = Vector2.ZERO) -> Array[Array]:
 	var file = FileAccess.open(attack_path, FileAccess.READ)
 	var text = file.get_as_text()
 	var s: Array[String] = []
@@ -240,13 +251,19 @@ func get_attack_patterns() -> Array[Array]:
 	
 	# Save the pattern angled in each of 4 directions
 	var omni_dir_patterns: Array[Array]
+	var adjustment_vector: Vector2i = current_tile
+	if use_override:
+		adjustment_vector = override_tile
 	var temp: Array[Vector2i] = []
-	omni_dir_patterns.push_back(attack_tiles)
+	for tile in attack_tiles:
+		temp.push_back(tile + adjustment_vector)
+	omni_dir_patterns.push_back(temp)
+	temp = []
 	
 	# UP Direction (1)
 	for tile in attack_tiles:
 		var diff = (origin.y - tile.y) * 2
-		temp.push_back(Vector2i(tile.x, tile.y + diff))
+		temp.push_back(Vector2i(tile.x, tile.y + diff) + adjustment_vector)
 	omni_dir_patterns.push_back(temp)
 	temp = []
 	
@@ -254,7 +271,7 @@ func get_attack_patterns() -> Array[Array]:
 	for tile in attack_tiles:
 		var x_diff = origin.x - tile.x
 		var y_diff = origin.y - tile.y
-		temp.push_back(Vector2i(-origin.y + y_diff, -origin.x + x_diff))
+		temp.push_back(Vector2i(-origin.y + y_diff, -origin.x + x_diff) + adjustment_vector)
 	omni_dir_patterns.push_back(temp)
 	temp = []
 	
@@ -262,7 +279,7 @@ func get_attack_patterns() -> Array[Array]:
 	for tile in attack_tiles:
 		var x_diff = origin.x - tile.x
 		var y_diff = origin.y - tile.y
-		temp.push_back(Vector2i(origin.y - y_diff, origin.x - x_diff))
+		temp.push_back(Vector2i(origin.y - y_diff, origin.x - x_diff) + adjustment_vector)
 	omni_dir_patterns.push_back(temp)
 	temp = []
 	
@@ -331,7 +348,10 @@ func init_selected():
 	select_key.set_invisible_after_time()
 
 # Z/ENTER was pressed while the unit was selected
-func init_moving(path: Array[Vector2i]):
+func init_moving(path: Array[Vector2i], attack_direction: int = -1):
+	# Update enemy variables
+	enemy_attack_dir = attack_direction
+	
 	# Moving 1 or more squares
 	if path.size() > 1:
 		current_game_state = game_state.moving
@@ -340,7 +360,10 @@ func init_moving(path: Array[Vector2i]):
 	# CASE: Moving 0 squares
 	else: 
 		await get_tree().create_timer(0.1).timeout
-		set_game_state(game_state.select_action)
+		if is_player:
+			set_game_state(game_state.select_action)
+		else:
+			show_attack()
 
 # Initializes post-movement action selection for player
 func init_action_selection():

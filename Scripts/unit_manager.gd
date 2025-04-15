@@ -2,6 +2,21 @@ extends Node2D
 
 @onready var grid = $"../IsometricGrid"
 
+@export_category("AI")
+@export var ai_type: ai_types
+enum ai_types{
+	point_values,
+	damage_only,
+	random
+}
+# Modifiers for "point based" utility decision making
+const util_players_damaged: int = 1
+const util_players_killed: int = 10
+const util_enemies_damaged: int = -2
+const util_enemies_killed: int = -20
+const util_damage: float = 0.1
+
+# Tracks units and subgroups of units
 var units: Array[Unit]
 var player_units: Array[Unit]
 var enemy_units: Array[Unit]
@@ -136,8 +151,31 @@ func next_enemy_move():
 			# Contains the details for attacking in a given direction 
 			var move_dictionary = create_move_dictionary(enemy)
 			
+			# Holds the next move
+			var next_move
+			
+			# CASE: MAKE RANDOM MOVES
+			if ai_type == ai_types.random:
+				next_move = get_random_move(move_dictionary)
+			
+			# CASE: NON-RANDOM MOVE
 			# Determine the best position to move and attack to based on this dictionary
-			var best_move = get_best_move(move_dictionary)
+			else:
+				next_move = get_best_move(move_dictionary)
+			
+			# Perform the move by doing the following:
+			# 1) move IF the tile to move to is different from the current
+			# 2) attack in the given direction UNLESS the output was -1, then wait
+			var new_tile: Vector2i = next_move[0]
+			var attack_direction: int = next_move[1]
+			
+			# Get A* path and initialize unit movement
+			enemy.init_moving(grid.get_path_astar(\
+					grid.get_tilenode_from_coord_map(enemy.current_tile), \
+					grid.get_tilenode_from_coord_map(new_tile)), \
+				attack_direction)
+			
+			pass
 
 # Returns a dictionary containing a set of tiles a given unit can reach
 # tile keys link to an int array containing data used to make optimal decisions.
@@ -159,7 +197,7 @@ func create_move_dictionary(current_enemy: Unit) -> Dictionary:
 		# where the unit can attack given each of 4 directions
 		# Down = 0, Up = 1, Left = 2, Right = 3
 		var temp_dictionary: Dictionary
-		var attack_set: Array[Array] = current_enemy.get_attack_patterns()
+		var attack_set: Array[Array] = current_enemy.get_attack_patterns(true, tile)
 		var attack_direction: int = 0
 		
 		# Create a new sub dictionary per attack set
@@ -221,15 +259,78 @@ func create_move_dictionary(current_enemy: Unit) -> Dictionary:
 # 2) optimal direction for the enemy to attack / SET TO -1 to WAIT !!!
 func get_best_move(move_dict: Dictionary) -> Array:
 	
-	# Evaluate the best possible move
-	# Loop through each position, and each attack direction therein
-	for tile in move_dict.values():
-		for direction in 4:
-			# Gets the Array[int] of data from the layered Dictionary
-			var test = tile[direction]
-			pass
+	# Save a reference to the best key/value pair
+	var best_move: Array = []
+	var best_tile: Vector2i = move_dict.keys()[0]
+	var best_direction: int = -1
+	var best_utiliy: float = -INF
 	
-	return []
+	# Choose the best move using one of the following methods
+	match ai_type:
+		
+		# Uses advantageous damage as the only metric for deciding on a move 
+		ai_types.damage_only:
+			
+			# Evaluate the best possible move
+			# Loop through each position, and each attack direction therein
+			for tile in move_dict.values():
+				for direction in 4:
+					
+					# Gets the Array[int] of data from the layered Dictionary
+					# Array of [# Players Hit, # Players Killed, # Enemies Hit, # Enemies Killed, Damage]
+					var data = tile[direction]
+					
+					# Measures the utility of this decision making algorithm
+					var players_hit: int = data[0]
+					var utility: int = data[4]
+					
+					# Damage utility must be greater than 0
+					if utility > best_utiliy and utility > 0:
+						best_tile = move_dict.find_key(tile)
+						best_utiliy = utility
+						
+						# Only set a direction if hitting players with the attack
+						if players_hit > 0:
+							best_direction = direction
+						else:
+							best_direction = -1
+		
+		# Uses a point based utility metric to decide on a move
+		ai_types.point_values:
+			
+			# Evaluate the best possible move
+			# Loop through each position, and each attack direction therein
+			for tile in move_dict.values():
+				for direction in 4:
+					
+					# Gets the Array[int] of data from the layered Dictionary
+					# Array of [# Players Hit, # Players Killed, # Enemies Hit, # Enemies Killed, Damage]
+					var data = tile[direction]
+					
+					# Measures the utility of this decision making algorithm
+					var players_hit: int = data[0]
+					var utility: float = (data[0] * util_players_damaged) + \
+									   (data[1] * util_players_killed) + \
+									   (data[2] * util_enemies_damaged) + \
+									   (data[3] * util_enemies_killed) + \
+									   (data[4] * util_damage)
+					
+					# Check for best utiltiy
+					if utility > best_utiliy:
+						best_tile = move_dict.find_key(tile)
+						best_utiliy = utility
+						
+						# Only set a direction if hitting players with the attack
+						if players_hit > 0:
+							best_direction = direction
+						else:
+							best_direction = -1
+	
+	# Create the Array[TILE, DIRECTION] to return
+	best_move.push_back(best_tile)
+	best_move.push_back(best_direction)
+	
+	return best_move
 
 # Selects a random move to execute
 func get_random_move(move_dict: Dictionary):

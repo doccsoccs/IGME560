@@ -1,0 +1,2 @@
+Damage = 188 | Kills = 6 | Enemies: Won | Damage Only (GOB)
+Damage = 154 | Kills = 3 | Enemies: Lost | Damage Only (GOB)

@@ -479,6 +479,7 @@ metadata/_edit_use_anchors_ = true
 
 [node name="SelectKeyIndicator" parent="." instance=ExtResource("5_b1ky1")]
 visible = false
+z_index = 11
 
 [node name="MovementGhost" parent="." instance=ExtResource("6_fnvkf")]
 visible = false

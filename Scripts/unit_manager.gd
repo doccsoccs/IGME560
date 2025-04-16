@@ -35,6 +35,8 @@ func _ready():
 				player_units.push_back(unit)
 			else:
 				enemy_units.push_back(unit)
+	
+	ResultsTracker.ai_type_used = ai_type
 
 # Returns an array containing all positions of active units
 func get_all_unit_positions() -> Array[Vector2i]:
@@ -131,6 +133,7 @@ func handle_end_turn(player_turn: bool):
 				await get_tree().create_timer(1.0).timeout
 				grid.camera_component.move_camera(unit.current_tile)
 				grid.move_selector(unit.current_tile)
+				grid.set_control_mode(grid.control_mode.free)
 				return
 		
 		# If all units are expended, switch turns

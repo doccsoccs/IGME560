@@ -7,7 +7,7 @@ var is_player_turn: bool = true
 #region SELECTOR VARIABLES
 const selector_atlus_pos: Vector2i = Vector2i(0,0)
 const selector_source: int = 3
-const init_selector_pos: Vector2i = Vector2i(0,0)
+@export var init_selector_pos: Vector2i = Vector2i.ZERO
 var current_selector_pos: Vector2i
 var toggle_index: int = 0
 #endregion
@@ -27,6 +27,7 @@ var coord_map_nodes: Array[TileNode]
 # Temp Data
 var hovered_unit: Unit = null
 var selected_unit: Unit = null
+#var active_units: Array[Unit] = []
 var active_move_tiles: Array[Vector2i]
 var active_attack_tiles: Array[Vector2i]
 var attack_patterns: Array[Array]
@@ -69,8 +70,9 @@ var unit_manager
 # Onload
 func _ready():
 	# Initializes Selector
-	set_cell(layers.selector, init_selector_pos, selector_source, selector_atlus_pos)
 	current_selector_pos = init_selector_pos
+	set_cell(layers.selector, init_selector_pos, selector_source, selector_atlus_pos)
+	move_selector(init_selector_pos)
 	
 	# Get the manager if it exists, else quit and throw error
 	if get_tree().get_first_node_in_group("UnitManager"):
@@ -207,10 +209,6 @@ func _input(event):
 			selected_unit.set_facing(selected_unit.facing_state.right)
 			delete_attack_tiles()
 			project_attack(current_attack_dir)
-	
-	# DEBUG CONTROLS
-	if event.is_action_pressed("TOGGLETURN"):
-		toggle_turn()
 
 # Switches which side's turn it is
 func toggle_turn():
@@ -219,19 +217,20 @@ func toggle_turn():
 	
 	# Lock player controls if is enemy turn, free if is player turn
 	# START ENEMY ROUND
-	if !is_player_turn:
+	if !is_player_turn and unit_manager.enemy_units.size() > 0:
 		for unit in unit_manager.enemy_units:
 			unit.init_for_new_round()
-		current_ctrl_mode = control_mode.locked
+		set_control_mode(control_mode.locked)
 		hide_selector()
 	
 	# START PLAYER ROUND
 	else:
-		for unit in unit_manager.player_units:
-			unit.init_for_new_round()
-		current_ctrl_mode = control_mode.free
-		camera_component.move_camera(unit_manager.player_units[0].current_tile)
-		move_selector(unit_manager.player_units[0].current_tile)
+		if unit_manager.player_units.size() > 0:
+			for unit in unit_manager.player_units:
+				unit.init_for_new_round()
+			camera_component.move_camera(unit_manager.player_units[0].current_tile)
+			move_selector(unit_manager.player_units[0].current_tile)
+			set_control_mode(control_mode.free)
 
 # Moves the selector to a new position and deletes the old tile
 func move_selector(new_pos: Vector2i):
@@ -555,13 +554,13 @@ func get_tilenode_from_coord_map(tile: Vector2i) -> TileNode:
 		return coord_map_nodes[coordinate_map.find(tile)]
 	else:
 		return null
-
-# Handles logic whenever a unit ends their turn
-func handle_end_turn():
-	if selected_unit != null:
-		current_ctrl_mode = control_mode.free
+#
+## Handles logic whenever a unit ends their turn
+#func handle_end_turn():
+	#if selected_unit != null:
+		#current_ctrl_mode = control_mode.free
 		#move_selector(selected_unit.current_tile)
-		deselect_unit(selected_unit)
+		#deselect_unit(selected_unit)
 
 # Sets the controller's control mode
 func set_control_mode(mode: control_mode):

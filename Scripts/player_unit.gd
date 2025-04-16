@@ -195,14 +195,15 @@ func show_attack():
 
 # Ends the unit's "turn"
 func end_turn():
-	manager.grid.handle_end_turn()
-	current_game_state = game_state.expended
+	manager.grid.selected_unit = null
+	set_game_state(game_state.expended)
 	
 	# ONLY MODULATE PLAYERS
 	if is_player:
 		self_modulate = end_turn_color
 	
 	manager.handle_end_turn(is_player)
+	#manager.grid.handle_end_turn()
 
 # Moves the unit immediately to a particular tile
 func move_to(target: Vector2i):
@@ -282,7 +283,9 @@ func get_attack_patterns(use_override: bool = false, override_tile: Vector2i = V
 	
 	# UP Direction (1)
 	for tile in attack_tiles:
-		var diff = (origin.y - tile.y) * 2
+		var diff: int = (origin.y - tile.y) * 2
+		if origin.y > 0:
+			diff = 0
 		temp.push_back(Vector2i(tile.x, tile.y + diff) + adjustment_vector)
 	omni_dir_patterns.push_back(temp)
 	temp = []
@@ -442,15 +445,17 @@ func die():
 	
 	await get_tree().create_timer(1.75).timeout
 	current_game_state = game_state.dead
-	if is_player:
+	if is_player: # ENEMIES WIN
 		manager.player_units.erase(self)
 		if manager.player_units.size() == 0:
 			await get_tree().create_timer(1.0).timeout
+			ResultsTracker.enemies_won = true
 			get_tree().change_scene_to_packed(results_scene)
-	else:
+	else: # PLAYERS WIN
 		manager.enemy_units.erase(self)
 		if manager.enemy_units.size() == 0:
 			await get_tree().create_timer(1.0).timeout
+			ResultsTracker.enemies_won = false
 			get_tree().change_scene_to_packed(results_scene)
 	visible = false
 	manager.units.erase(self)

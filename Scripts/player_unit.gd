@@ -38,7 +38,8 @@ enum game_state{
 	selected,
 	moving,
 	select_action,
-	expended
+	expended,
+	dead
 }
 
 enum anim_state{
@@ -83,6 +84,8 @@ var move_path: Array[Vector2i]
 var current_game_state: game_state
 const initial_game_state: game_state = game_state.waiting
 const initial_anim: anim_state = anim_state.idle
+
+var results_scene = preload("res://Scenes/results.tscn")
 
 @onready var anim_player = $AnimationPlayer
 @onready var select_key = $SelectKeyIndicator
@@ -161,17 +164,24 @@ func init_for_new_round():
 	self_modulate = Color.WHITE
 
 # Called when this unit takes damage from an attack
-func take_damage(damage: int, damage_type: typing):
+func take_damage(damage: int, damage_type: typing, enemy_is_attacker: bool = false):
 	particle_manager.emit_particles(damage_type)
 	hp -= damage
+	
+	# Update result tracker accordingly
+	if enemy_is_attacker:
+		ResultsTracker.total_enemy_damage += damage
+	
 	if hp <= 0:
 		hp = 0
+		die()
 	health_label.text = str(hp)
 
 # Inform manager to change control mode to ATTACKING
 # Project an attack
 func show_attack():
 	manager.grid.attack_patterns = get_attack_patterns()
+	manager.grid.camera_component.move_camera(current_tile)
 	
 	if is_player: # Player Case
 		manager.grid.current_ctrl_mode = manager.grid.control_mode.attacking
@@ -423,6 +433,27 @@ func set_move_animation(target_pos: Vector2i):
 		update_animations(anim_state.walk_fb)
 		current_facing_state = facing_state.up
 		flip_h = true
+
+# Handle the death of a given unit
+func die():
+	# Update result tracker accordingly
+	if is_player:
+		ResultsTracker.total_enemy_kills += 1
+	
+	await get_tree().create_timer(1.75).timeout
+	current_game_state = game_state.dead
+	if is_player:
+		manager.player_units.erase(self)
+		if manager.player_units.size() == 0:
+			await get_tree().create_timer(1.0).timeout
+			get_tree().change_scene_to_packed(results_scene)
+	else:
+		manager.enemy_units.erase(self)
+		if manager.enemy_units.size() == 0:
+			await get_tree().create_timer(1.0).timeout
+			get_tree().change_scene_to_packed(results_scene)
+	visible = false
+	manager.units.erase(self)
 
 # Shortcut for map -> local conversion
 func map_to_loc(tile: Vector2i) -> Vector2:

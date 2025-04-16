@@ -128,6 +128,9 @@ func handle_end_turn(player_turn: bool):
 	if player_turn:
 		for unit in player_units:
 			if unit.current_game_state != unit.game_state.expended:
+				await get_tree().create_timer(1.0).timeout
+				grid.camera_component.move_camera(unit.current_tile)
+				grid.move_selector(unit.current_tile)
 				return
 		
 		# If all units are expended, switch turns
@@ -138,6 +141,7 @@ func handle_end_turn(player_turn: bool):
 	
 	# Checks during enemy turn
 	else:
+		await get_tree().create_timer(1.0).timeout
 		emit_signal("enemy_finished_move")
 		for unit in enemy_units:
 			if unit.current_game_state != unit.game_state.expended:
@@ -148,6 +152,8 @@ func handle_end_turn(player_turn: bool):
 func next_enemy_move():
 	await get_tree().create_timer(1.2).timeout
 	for enemy in enemy_units:
+		grid.camera_component.move_camera(enemy.current_tile)
+		await get_tree().create_timer(0.5).timeout
 		if enemy.current_game_state != enemy.game_state.expended:
 			# Retrieves a dictionary of potential movements the enemy can take
 			# Contains the details for attacking in a given direction 
@@ -178,7 +184,7 @@ func next_enemy_move():
 				attack_direction)
 			
 			await enemy_finished_move
-			await get_tree().create_timer(1.0).timeout
+			await get_tree().create_timer(1.5).timeout
 
 # Returns a dictionary containing a set of tiles a given unit can reach
 # tile keys link to an int array containing data used to make optimal decisions.
@@ -365,7 +371,7 @@ func get_random_move(move_dict: Dictionary) -> Array:
 	var random_tile: Vector2i = move_dict.keys()[0]
 	var random_direction: int = -1
 	
-	random_tile = move_dict.keys()[randi_range(0,move_dict.size())]
+	random_tile = move_dict.keys()[randi_range(0,move_dict.size() - 1)]
 	random_direction = randi_range(-1,3)
 	
 	random_move.push_back(random_tile)

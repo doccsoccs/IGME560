@@ -1,0 +1,70 @@
+[gd_scene load_steps=5 format=3 uid="uid://bvuu0yoh18ios"]
+
+[ext_resource type="Script" path="res://Scripts/results.gd" id="1_32upa"]
+[ext_resource type="FontFile" uid="uid://c4aoq70jhlfo" path="res://Sprites/UI/dogica/TTF/dogica.ttf" id="1_lgqny"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_6rcmj"]
+font = ExtResource("1_lgqny")
+font_size = 64
+outline_size = 2
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 8
+shadow_color = Color(0, 0, 0, 0.941176)
+
+[sub_resource type="LabelSettings" id="LabelSettings_1g2t6"]
+font = ExtResource("1_lgqny")
+font_size = 32
+
+[node name="Results" type="CanvasLayer"]
+script = ExtResource("1_32upa")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.356863, 0.364706, 1)
+
+[node name="Header" type="Label" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 133.0
+grow_horizontal = 2
+text = "RESULTS"
+label_settings = SubResource("LabelSettings_6rcmj")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WonLostLabel" type="Label" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 392.0
+offset_bottom = 525.0
+grow_horizontal = 2
+text = "Enemies: Lost"
+label_settings = SubResource("LabelSettings_6rcmj")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DamageLabel" type="Label" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 127.0
+offset_bottom = 260.0
+grow_horizontal = 2
+text = "Total Enemy Damage = 0"
+label_settings = SubResource("LabelSettings_1g2t6")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UnitsKilledLabel" type="Label" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 195.0
+offset_bottom = 328.0
+grow_horizontal = 2
+text = "Player Units Killed = 0"
+label_settings = SubResource("LabelSettings_1g2t6")
+horizontal_alignment = 1
+vertical_alignment = 1

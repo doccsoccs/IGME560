@@ -9,6 +9,7 @@ const selector_atlus_pos: Vector2i = Vector2i(0,0)
 const selector_source: int = 3
 const init_selector_pos: Vector2i = Vector2i(0,0)
 var current_selector_pos: Vector2i
+var toggle_index: int = 0
 #endregion
 
 #region HIGHLIGHT TILE VARIABLES
@@ -60,7 +61,8 @@ var current_ctrl_mode: control_mode
 # Sound Effects
 @onready var move_selector_sfx = $MoveSelectorSFX
 
-# References
+# MISC References
+@onready var camera_component = $"../CameraComponent"
 @onready var game_canvas = $"../GameCanvas"
 var unit_manager
 
@@ -87,6 +89,30 @@ func _ready():
 
 # Input Events
 func _input(event):
+	# Toggle Between Player Units (RIGHT)
+	if event.is_action_pressed("ToggleUnitRight") and current_ctrl_mode == control_mode.free \
+	and selected_unit == null:
+		if hovered_unit == null or unit_manager.player_units.size() == toggle_index + 1:
+			toggle_index = 0
+		elif unit_manager.player_units.size() > toggle_index + 1:
+			toggle_index += 1
+		hovered_unit = unit_manager.player_units[toggle_index]
+		camera_component.move_camera(hovered_unit.current_tile)
+		move_selector(hovered_unit.current_tile)
+		hovered_unit = unit_manager.player_units[toggle_index]
+	
+	# Toggle Between Player Units (LEFT)
+	if event.is_action_pressed("ToggleUnitLeft") and current_ctrl_mode == control_mode.free \
+	and selected_unit == null:
+		if hovered_unit == null or toggle_index - 1 < 0:
+			toggle_index = unit_manager.player_units.size() - 1
+		elif toggle_index - 1 >= 0:
+			toggle_index -= 1
+		hovered_unit = unit_manager.player_units[toggle_index]
+		camera_component.move_camera(hovered_unit.current_tile)
+		move_selector(hovered_unit.current_tile)
+		hovered_unit = unit_manager.player_units[toggle_index]
+	
 	# SELECT - SELECT UNIT
 	if event.is_action_pressed("Select") and hovered_unit != null and selected_unit == null \
 	and current_ctrl_mode == control_mode.free:
@@ -123,6 +149,7 @@ func _input(event):
 		selected_unit.action_buttons.set_invisible_after_time(0)
 		selected_unit.move_to(selected_unit.prev_tile)
 		selected_unit.current_tile = selected_unit.prev_tile
+		camera_component.move_camera(selected_unit.current_tile)
 		move_selector(selected_unit.current_tile)
 		redraw_move_tiles()
 	
@@ -203,6 +230,7 @@ func toggle_turn():
 		for unit in unit_manager.player_units:
 			unit.init_for_new_round()
 		current_ctrl_mode = control_mode.free
+		camera_component.move_camera(unit_manager.player_units[0].current_tile)
 		move_selector(unit_manager.player_units[0].current_tile)
 
 # Moves the selector to a new position and deletes the old tile
@@ -223,6 +251,9 @@ func move_selector(new_pos: Vector2i):
 		# Only check for potential selections while not selecting something
 		else:
 			check_for_selections()
+	
+	# Moves the camera if necessary
+	camera_component.update_camera(current_selector_pos)
 
 # Hides the selector while not in free control mode
 func hide_selector():
@@ -393,12 +424,13 @@ func attack_active_tiles(unit_override: Unit = null):
 				unit.take_damage(unit_manager.calc_damage(selected_unit, unit), selected_unit.attack_type)
 			
 			else: # ENEMY CASE
-				unit.take_damage(unit_manager.calc_damage(unit_override, unit), unit_override.attack_type)
+				unit.take_damage(unit_manager.calc_damage(unit_override, unit), unit_override.attack_type, true)
 	
 	# Await damage particles and hp anim to finish
 	# then clear attack highlights and end turn
 	delete_attack_tiles()
 	
+	await get_tree().create_timer(1.2).timeout
 	if unit_override == null: # PLAYER CASE
 		selected_unit.end_turn()
 	else: # ENEMY CASE
@@ -528,7 +560,7 @@ func get_tilenode_from_coord_map(tile: Vector2i) -> TileNode:
 func handle_end_turn():
 	if selected_unit != null:
 		current_ctrl_mode = control_mode.free
-		move_selector(selected_unit.current_tile)
+		#move_selector(selected_unit.current_tile)
 		deselect_unit(selected_unit)
 
 # Sets the controller's control mode

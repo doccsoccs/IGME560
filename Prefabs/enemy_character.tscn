@@ -427,6 +427,7 @@ libraries = {
 
 [node name="DamageOverhead" type="Sprite2D" parent="."]
 visible = false
+z_index = 10
 position = Vector2(0, -36)
 scale = Vector2(0.75, 0.75)
 texture = ExtResource("6_b00vw")

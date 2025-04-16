@@ -26,6 +26,9 @@ var hp: int
 @export_category("MAP POSITION")
 @export var start_tile: Vector2i
 @export var start_facing: facing_state
+
+@export_category("MODULATE")
+@export var end_turn_color: Color = Color.GRAY
 #endregion
 
 #region STATE MACHINES
@@ -175,13 +178,20 @@ func show_attack():
 		manager.grid.project_attack(current_facing_state)
 	else: # Enemy Case
 		set_facing(enemy_attack_dir)
-		manager.grid.project_attack(current_facing_state, self)
+		if enemy_attack_dir > -1:
+			manager.grid.project_attack(current_facing_state, self)
+		else:
+			end_turn()
 
 # Ends the unit's "turn"
 func end_turn():
 	manager.grid.handle_end_turn()
 	current_game_state = game_state.expended
-	self_modulate = Color.DARK_GRAY
+	
+	# ONLY MODULATE PLAYERS
+	if is_player:
+		self_modulate = end_turn_color
+	
 	manager.handle_end_turn(is_player)
 
 # Moves the unit immediately to a particular tile
@@ -250,7 +260,7 @@ func get_attack_patterns(use_override: bool = false, override_tile: Vector2i = V
 				attack_tiles.push_back(Vector2i(c,r) - origin)
 	
 	# Save the pattern angled in each of 4 directions
-	var omni_dir_patterns: Array[Array]
+	var omni_dir_patterns: Array[Array] = []
 	var adjustment_vector: Vector2i = current_tile
 	if use_override:
 		adjustment_vector = override_tile

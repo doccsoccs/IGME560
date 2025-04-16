@@ -14,7 +14,7 @@ const util_players_damaged: int = 1
 const util_players_killed: int = 10
 const util_enemies_damaged: int = -2
 const util_enemies_killed: int = -20
-const util_damage: float = 0.1
+const util_damage: float = 0.25
 
 # Tracks units and subgroups of units
 var units: Array[Unit]
@@ -138,6 +138,7 @@ func handle_end_turn(player_turn: bool):
 	
 	# Checks during enemy turn
 	else:
+		emit_signal("enemy_finished_move")
 		for unit in enemy_units:
 			if unit.current_game_state != unit.game_state.expended:
 				return
@@ -145,6 +146,7 @@ func handle_end_turn(player_turn: bool):
 
 # Initiates the next enemy move during the enemy turn
 func next_enemy_move():
+	await get_tree().create_timer(1.2).timeout
 	for enemy in enemy_units:
 		if enemy.current_game_state != enemy.game_state.expended:
 			# Retrieves a dictionary of potential movements the enemy can take
@@ -161,7 +163,7 @@ func next_enemy_move():
 			# CASE: NON-RANDOM MOVE
 			# Determine the best position to move and attack to based on this dictionary
 			else:
-				next_move = get_best_move(move_dictionary)
+				next_move = get_best_move(move_dictionary, enemy)
 			
 			# Perform the move by doing the following:
 			# 1) move IF the tile to move to is different from the current
@@ -175,7 +177,8 @@ func next_enemy_move():
 					grid.get_tilenode_from_coord_map(new_tile)), \
 				attack_direction)
 			
-			pass
+			await enemy_finished_move
+			await get_tree().create_timer(1.0).timeout
 
 # Returns a dictionary containing a set of tiles a given unit can reach
 # tile keys link to an int array containing data used to make optimal decisions.
@@ -196,7 +199,7 @@ func create_move_dictionary(current_enemy: Unit) -> Dictionary:
 		# Retrieve an array of tile positions indicating 
 		# where the unit can attack given each of 4 directions
 		# Down = 0, Up = 1, Left = 2, Right = 3
-		var temp_dictionary: Dictionary
+		var temp_dictionary: Dictionary = {}
 		var attack_set: Array[Array] = current_enemy.get_attack_patterns(true, tile)
 		var attack_direction: int = 0
 		
@@ -257,7 +260,7 @@ func create_move_dictionary(current_enemy: Unit) -> Dictionary:
 # Returns a list containing the following:
 # 1) optimal position for the enemy to move to
 # 2) optimal direction for the enemy to attack / SET TO -1 to WAIT !!!
-func get_best_move(move_dict: Dictionary) -> Array:
+func get_best_move(move_dict: Dictionary, enemy: Unit) -> Array:
 	
 	# Save a reference to the best key/value pair
 	var best_move: Array = []
@@ -281,19 +284,17 @@ func get_best_move(move_dict: Dictionary) -> Array:
 					var data = tile[direction]
 					
 					# Measures the utility of this decision making algorithm
-					var players_hit: int = data[0]
 					var utility: int = data[4]
 					
 					# Damage utility must be greater than 0
 					if utility > best_utiliy and utility > 0:
 						best_tile = move_dict.find_key(tile)
 						best_utiliy = utility
-						
-						# Only set a direction if hitting players with the attack
-						if players_hit > 0:
-							best_direction = direction
-						else:
-							best_direction = -1
+						best_direction = direction
+			
+			if best_utiliy <= 0:
+				best_direction = -1
+				best_tile = find_closest_tile(enemy, move_dict.keys())
 		
 		# Uses a point based utility metric to decide on a move
 		ai_types.point_values:
@@ -325,6 +326,7 @@ func get_best_move(move_dict: Dictionary) -> Array:
 							best_direction = direction
 						else:
 							best_direction = -1
+							best_tile = find_closest_tile(enemy, move_dict.keys())
 	
 	# Create the Array[TILE, DIRECTION] to return
 	best_move.push_back(best_tile)
@@ -332,6 +334,42 @@ func get_best_move(move_dict: Dictionary) -> Array:
 	
 	return best_move
 
+# Finds a tile in the given move set closest to the nearest player unit 
+func find_closest_tile(searching_unit: Unit, tiles: Array) -> Vector2i:
+	var best_tile: Vector2i = tiles[0]
+	
+	# Get a reference to the closest player unit
+	var closest_unit: Unit = player_units[0]
+	var best_distance: float = INF
+	for unit in player_units:
+		if abs(Vector2(searching_unit.current_tile.x, searching_unit.current_tile.y).distance_squared_to\
+		(Vector2(unit.current_tile.x, unit.current_tile.y)))\
+		< best_distance:
+			
+			closest_unit = unit
+			best_distance = abs(Vector2(searching_unit.current_tile.x, searching_unit.current_tile.y).distance_squared_to\
+							(Vector2(unit.current_tile.x, unit.current_tile.y)))
+	
+	# Find a tile within the valid move tile array closest to the closest unit
+	best_distance = INF
+	for tile in tiles:
+		if abs(Vector2(tile.x,tile.y).distance_squared_to(closest_unit.current_tile)) < best_distance:
+			best_tile = tile
+			best_distance = abs(Vector2(tile.x,tile.y).distance_squared_to(closest_unit.current_tile))
+	
+	return best_tile
+
 # Selects a random move to execute
-func get_random_move(move_dict: Dictionary):
-	return
+func get_random_move(move_dict: Dictionary) -> Array:
+	var random_move: Array = []
+	var random_tile: Vector2i = move_dict.keys()[0]
+	var random_direction: int = -1
+	
+	random_tile = move_dict.keys()[randi_range(0,move_dict.size())]
+	random_direction = randi_range(-1,3)
+	
+	random_move.push_back(random_tile)
+	random_move.push_back(random_direction)
+	return random_move
+
+signal enemy_finished_move()

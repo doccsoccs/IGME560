@@ -191,10 +191,17 @@ func toggle_turn():
 	game_canvas.update_turn_indicator(is_player_turn)
 	
 	# Lock player controls if is enemy turn, free if is player turn
+	# START ENEMY ROUND
 	if !is_player_turn:
+		for unit in unit_manager.enemy_units:
+			unit.init_for_new_round()
 		current_ctrl_mode = control_mode.locked
 		hide_selector()
+	
+	# START PLAYER ROUND
 	else:
+		for unit in unit_manager.player_units:
+			unit.init_for_new_round()
 		current_ctrl_mode = control_mode.free
 		move_selector(unit_manager.player_units[0].current_tile)
 
@@ -352,8 +359,14 @@ func project_attack(index: int, unit_override: Unit = null):
 		var unit = unit_manager.get_unit_at_tile(tile)
 		if unit != null and unit_override == null: # Player Case
 			unit.show_damage_indicator(selected_unit)
+		
 		elif unit != null and unit_override != null: # Enemy Case
 			unit.show_damage_indicator(unit_override)
+	
+	# ENEMY AUTO ATTACKS
+	if unit_override != null:
+		await get_tree().create_timer(2.0).timeout
+		attack_active_tiles(unit_override)
 
 # Erases attack highlight tiles and clears the attack tile list
 func delete_attack_tiles():
@@ -369,18 +382,27 @@ func draw_attack_tile(tile: Vector2i):
 
 # The selected unit attacks all active attack tiles
 # ONLY ATTACK & LOCK CONTROLER IF HITTING SOMETHING
-func attack_active_tiles():
+func attack_active_tiles(unit_override: Unit = null):
 	var units_to_attack: Array[Unit] = unit_manager.get_units_in_tile_list(active_attack_tiles)
 	if units_to_attack.size() > 0:
 		current_ctrl_mode = control_mode.locked
 		for unit in units_to_attack:
 			unit.hide_damage_indicator()
-			unit.take_damage(unit_manager.calc_damage(selected_unit, unit), selected_unit.attack_type)
+			
+			if unit_override == null: # PLAYER CASE
+				unit.take_damage(unit_manager.calc_damage(selected_unit, unit), selected_unit.attack_type)
+			
+			else: # ENEMY CASE
+				unit.take_damage(unit_manager.calc_damage(unit_override, unit), unit_override.attack_type)
 	
 	# Await damage particles and hp anim to finish
 	# then clear attack highlights and end turn
 	delete_attack_tiles()
-	selected_unit.end_turn()
+	
+	if unit_override == null: # PLAYER CASE
+		selected_unit.end_turn()
+	else: # ENEMY CASE
+		unit_override.end_turn()
 
 # Creates a series of nodes that help perform pathfinding algorithms
 func init_coord_map():
@@ -483,7 +505,7 @@ func get_path_astar(start: TileNode, goal: TileNode) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
 	# Construct path for return
 	if current.node != goal:
-		print("Search Failed")
+		#print("Search Failed")
 		return []
 	
 	else:
@@ -502,11 +524,12 @@ func get_tilenode_from_coord_map(tile: Vector2i) -> TileNode:
 	else:
 		return null
 
-# Handles logic whenever player unit ends turn
+# Handles logic whenever a unit ends their turn
 func handle_end_turn():
-	current_ctrl_mode = control_mode.free
-	move_selector(selected_unit.current_tile)
-	deselect_unit(selected_unit)
+	if selected_unit != null:
+		current_ctrl_mode = control_mode.free
+		move_selector(selected_unit.current_tile)
+		deselect_unit(selected_unit)
 
 # Sets the controller's control mode
 func set_control_mode(mode: control_mode):
